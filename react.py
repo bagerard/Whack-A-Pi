@@ -1,11 +1,26 @@
-from gpiozero import LEDBoard, Button
 import time
 from random import randint
 from threading import Thread, Event
+from contextlib import contextmanager
+
+from gpiozero import LEDBoard, Button
+
+
+@contextmanager
+def light_on_led(led):
+    print(f"Light on LED {led.pin.number}")
+    led.on()
+    try:
+        yield
+    finally:
+        print(f"Light off LED {led.pin.number}")
+        led.off()
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, game_time: int):
+        self.game_time = game_time
+
         self.lights = LEDBoard(2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 10, 9)
         self.buttons = [
             Button(25),
@@ -22,6 +37,7 @@ class Game:
             Button(20),
             Button(21),
         ]
+
         self.start_time = 0
         self.score = 0
         self.game_thread = None
@@ -30,15 +46,20 @@ class Game:
         self.game_stop = Event()
         self.current_idx = -1
 
+    def _get_button_led(self, idx):
+        return self.buttons[idx], self.lights[idx]
+
     def start_loop_btn_thread(self):
+        """
+        WHILE WAITING FOR BUTTONS AND PI
+        """
         def _loop_btn(buttons):
             while True:
                 for btn in buttons:
-                    print(f'push button {btn}')
+                    print(f'push button {btn.pin.number}')
                     btn.pin.drive_low()
-                    print(f'release button {btn}')
                     btn.pin.drive_high()
-                    time.sleep(1)
+                    time.sleep(0.5)
         print('start start_loop_btn_thread')
         Thread(target=_loop_btn, args=(self.buttons,)).start()
 
@@ -53,37 +74,24 @@ class Game:
         self.lights.off()
 
         for idx in range(0, self.n_leds):
-            print(self.lights.leds[idx].pin.number)
-            self.lights.leds[idx].on()
-            self.buttons[idx].wait_for_press(30)
-            self.lights.leds[idx].off()
+            btn, led = self._get_button_led(idx)
+            print(led.pin.number)
+            with light_on_led(led):
+                btn.wait_for_press(30)
 
     def elapsed_time(self):
         return time.time() - self.start_time
 
-    def wait_for_press(self, idx, delay=-1):
-        print("wait_for_press")
-        wait_start = time.time()
-        while not self.game_stop.isSet():
-            if self.buttons[idx].is_pressed:
-                return True
-            if time.time() - wait_start >= delay:
-                break
-        return False
-
     def ready_wait(self, delay):
         print('ready_wait')
         self.lights.off()
+
         btn_idx = 3
-        led = self.lights.leds[btn_idx]
-        btn = self.buttons[btn_idx]
+        btn, led = self._get_button_led(btn_idx)
 
-        print(f'Light on {led}')
-        led.on()
-        print(f'Waiting for {btn}...')
-        btn_pressed = btn.wait_for_press(delay)
+        with light_on_led(led):
+            btn_pressed = btn.wait_for_press(delay)
 
-        led.off()
         print('btn_pressed')
         return btn_pressed
 
@@ -105,24 +113,20 @@ class Game:
         elapsed = 0
         last_idx = -1
         self.score = 0
-        while elapsed < 60 and not self.game_stop.isSet():
+
+        while elapsed < self.game_time and not self.game_stop.isSet():
             # Find a button that is not the last one
             while last_idx == self.current_idx:
                 self.current_idx = randint(0, self.n_leds - 1)
 
-            led = self.lights.leds[self.current_idx]
-            btn = self.buttons[self.current_idx]
+            btn, led = self._get_button_led(self.current_idx)
 
-            led.on()
-
-            delay = max(0, 60 - self.elapsed_time())
-            # print(delay)
-
-            print(f'run game, waiting on {btn}')
-            if btn.wait_for_press(delay):
-                self.score += 1
-
-            led.off()
+            with light_on_led(led):
+                delay = max(0, self.game_time - self.elapsed_time())
+                # print(delay)
+                print(f'--> run game, waiting on {btn.pin.number}...')
+                if btn.wait_for_press(delay):
+                    self.score += 1
 
             last_idx = self.current_idx
             elapsed = self.elapsed_time()

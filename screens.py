@@ -1,9 +1,12 @@
+from typing import List
+
 import pygame
 import eztext
 import sys
 
 # set SIZE of the screen
-SIZE = width, height = 1280, 800
+SIZE = (1280, 800)
+width, height = SIZE
 
 # define colours
 BLUE = 26, 0, 255
@@ -27,14 +30,14 @@ def align_v(label, rows=1, row=0, height=SIZE[1]):
     return ((row_height - label.get_height()) / 2) + row_height * row
 
 
-def menu_screen(screen, scores):
+def menu_screen(screen, scores: List, scores_categories: List[str]):
     global top
 
     line_pos = 15
     screen.fill(BLACK)  # change the colours if needed
     fnt_head = pygame.font.Font(None, 288)
     fnt_title = pygame.font.Font(None, 84)
-    lab_head = fnt_head.render("Whack-A-Pi", 1, (YELLOW))
+    lab_head = fnt_head.render("Whack-A-Pi", 1, YELLOW)
     screen.blit(lab_head, (align_h(lab_head), line_pos))
     line_pos += lab_head.get_height() + 60
 
@@ -43,7 +46,7 @@ def menu_screen(screen, scores):
     top = line_pos
     max_width = SIZE[0] / 3
     max_height = SIZE[1] - top
-    for i in range(0, 3):
+    for i, score_category in enumerate(scores_categories):
         rect = left, top, width, height = (
             (max_width * i) + 10,
             top,
@@ -51,30 +54,24 @@ def menu_screen(screen, scores):
             max_height - 10,
         )
         pygame.draw.rect(screen, WHITE, rect, 1)
-        if i == 0:
-            title = "12 and under"
-        elif i == 1:
-            title = "13 to 17"
-
-        elif i == 2:
-            title = "Adult"
 
         line_pos = top  # reset the vertical cursor
         line_pos += 45
-        lab_title = fnt_title.render(title, 1, (WHITE))
+        lab_title = fnt_title.render(score_category, 1, WHITE)
         screen.blit(lab_title, (align_h(lab_title, 3, i), line_pos))
 
         line_pos += lab_title.get_height() + 30
-        lab_score = fnt_score.render("{:0>3d}".format(scores[i][0]), 1, (BLUE))
+        lab_score = fnt_score.render("{:0>3d}".format(scores[i][0]), 1, BLUE)
         screen.blit(lab_score, (align_h(lab_score, 3, i), line_pos))
 
         line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(scores[i][1], 1, (ORANGE))
+        lab_name1 = fnt_title.render(scores[i][1], 1, ORANGE)
         screen.blit(lab_name1, (align_h(lab_name1, 3, i), line_pos))
 
-        line_pos += lab_name1.get_height() + 15
-        lab_name2 = fnt_title.render(scores[i][2], 1, (ORANGE))
-        screen.blit(lab_name2, (align_h(lab_name2, 3, i), line_pos))
+        # old Lastname
+        # line_pos += lab_name1.get_height() + 15
+        # lab_name2 = fnt_title.render(scores[i][2], 1, ORANGE)
+        # screen.blit(lab_name2, (align_h(lab_name2, 3, i), line_pos))
 
     pygame.display.flip()
 
@@ -82,32 +79,32 @@ def menu_screen(screen, scores):
 def game_screen(screen, elapsed, score, hiscore, wait=False):
     screen.fill(BLACK)  # change the colours if needed
     fnt_title = pygame.font.Font(None, 144)
-    lab_time_title = fnt_title.render("Time", 1, (WHITE))
+    lab_time_title = fnt_title.render("Time", 1, WHITE)
     screen.blit(lab_time_title, (align_h(lab_time_title, 2, 0), 15))
 
     fnt_title = pygame.font.Font(None, 144)
-    lab_score_title = fnt_title.render("Score", 1, (WHITE))
+    lab_score_title = fnt_title.render("Score", 1, WHITE)
     screen.blit(lab_score_title, (align_h(lab_score_title, 2, 1), 15))
 
     if wait:
-        lab_wait = fnt_title.render("Press light when ready", 1, (YELLOW))
+        lab_wait = fnt_title.render("Press light when ready", 1, YELLOW)
         screen.blit(
             lab_wait, (align_h(lab_wait, 1, 0), 15 + lab_score_title.get_height())
         )
 
     font = pygame.font.Font("digital-7 (mono).ttf", 432)
 
-    lab_time = font.render("{:0>2d}".format(elapsed), 1, (ORANGE))
+    lab_time = font.render("{:0>2d}".format(elapsed), 1, ORANGE)
     screen.blit(lab_time, (align_h(lab_time, 2, 0), align_v(lab_time)))
 
-    lab_score = font.render("{:0>3d}".format(score), 1, (BLUE))
+    lab_score = font.render("{:0>3d}".format(score), 1, BLUE)
     screen.blit(lab_score, (align_h(lab_score, 2, 1), align_v(lab_score)))
 
     fnt_subtitle = pygame.font.Font(None, 120)
-    lab_hi_title = fnt_subtitle.render("Hi-Score:", 1, (WHITE))
+    lab_hi_title = fnt_subtitle.render("Hi-Score:", 1, WHITE)
 
     fnt_hiscore = pygame.font.Font("digital-7 (mono).ttf", 144)
-    lab_hi_score = fnt_hiscore.render("{:0>3d}".format(hiscore), 1, (BLUE))
+    lab_hi_score = fnt_hiscore.render("{:0>3d}".format(hiscore), 1, BLUE)
 
     score_top = SIZE[1] - lab_hi_score.get_height() - 30
     hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2
@@ -141,12 +138,13 @@ def _draw_win_screen(screen):
     )
 
 
-def win_screen(screen):
+def win_screen(screen) -> List[str]:
+    """Returns User input from the win screen"""
+    print('Display win screen')
     line_pos = SIZE[1] / 3
     SPACE = 50
-    inputboxes = []
-    inputboxes.append(
-        eztext.Input(
+
+    firstname_input = eztext.Input(
             maxlength=30,
             color=WHITE,
             focuscolor=YELLOW,
@@ -155,40 +153,7 @@ def win_screen(screen):
             y=line_pos,
             hasfocus=True,
         )
-    )
-    line_pos += SPACE
-    inputboxes.append(
-        eztext.Input(
-            maxlength=30,
-            color=WHITE,
-            focuscolor=YELLOW,
-            prompt="Last: ",
-            x=15,
-            y=line_pos,
-        )
-    )
-    line_pos += SPACE
-    inputboxes.append(
-        eztext.Input(
-            maxlength=15,
-            color=WHITE,
-            focuscolor=YELLOW,
-            prompt="Twitter: @",
-            x=15,
-            y=line_pos,
-        )
-    )
-    line_pos += SPACE
-    inputboxes.append(
-        eztext.Input(
-            maxlength=30,
-            color=WHITE,
-            focuscolor=YELLOW,
-            prompt="Cont: ",
-            x=15,
-            y=line_pos,
-        )
-    )
+    inputboxes = [firstname_input]
 
     ib_idx = 0
     while True:

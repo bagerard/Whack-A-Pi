@@ -1,20 +1,22 @@
 import time
-import os
-import json
-
-import pygame
+import traceback
 import sys
 
-from screens import *
-import react
-import traceback
+import pygame
+
+from screens import game_screen, SIZE, menu_screen, lose_screen, win_screen
+from react import Game
+from scores import save_scores, load_scores
 
 game_level = -1
 
+GAME_TIME = 5
+
+SCORE_CATEGORIES = ['Dev', 'F&A', 'Op']
 DEFAULT_HIGH_SCORES = [
-    [0, "Olivier", "Athos", None, None],
-    [0, "Rene", "Aramis", None, None],
-    [0, "Isaac", "Porthos", None, None],
+    [0, "Olivier"],
+    [0, "Rene"],
+    [0, "Isaac"],
 ]
 
 SCORE_FILE = "scores.json"
@@ -23,24 +25,6 @@ SCORE_FILE = "scores.json"
 class GameContext:
     def __init__(self, current_mode):
         self.current_mode = current_mode
-
-
-def save_scores(high_scores):
-    print("save_score")
-    if os.access(SCORE_FILE, os.W_OK):
-        os.rename(SCORE_FILE, SCORE_FILE + "." + str(time.time()))
-    with open(SCORE_FILE, mode="w", encoding="utf-8") as f:
-        json.dump(high_scores, f, indent=2)
-
-
-def load_scores():
-    print("load_score")
-    if os.access(SCORE_FILE, os.R_OK):
-        print("open")
-        with open(SCORE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    print('Load default scores')
-    return DEFAULT_HIGH_SCORES
 
 
 def on_click(game_engine, high_scores, game_ctx):
@@ -61,8 +45,7 @@ def on_click(game_engine, high_scores, game_ctx):
 def show_mainscreen(game_engine, high_scores) -> None:
     print("show_mainscreen")
     game_engine.start_idle()
-    print("menu_screen")
-    menu_screen(screen, high_scores)
+    menu_screen(screen, high_scores, scores_categories=SCORE_CATEGORIES)
     print("out of show_mainscreen")
 
 
@@ -74,9 +57,9 @@ def play_music(mp3_path: str) -> None:
 
 def main():
     game_ctx = GameContext(current_mode="menu")
-    game_engine = react.Game()
-    print("main")
-    high_scores = load_scores()
+    high_scores = load_scores(SCORE_FILE) or DEFAULT_HIGH_SCORES
+
+    game_engine = Game(game_time=GAME_TIME)
     show_mainscreen(game_engine, high_scores=high_scores)
 
     print('start main while loop')
@@ -89,17 +72,18 @@ def main():
         if game_ctx.current_mode == "initgame":
             game_engine.stop_idle()
             print('game_screen')
-            game_screen(screen, 60, 0, high_scores[game_level][0], True)
+
+            highest_score = high_scores[game_level][0]
+            game_screen(screen, GAME_TIME, 0, highest_score, wait=True)
 
             game_engine.start_loop_btn_thread()                         # BAG DEBUG
             print('game_engine.ready_wait')
-            if game_engine.ready_wait(60):
+
+            if game_engine.ready_wait(min(60, GAME_TIME)):
                 play_music("Robot Wars Clean SFX- 3 2 1 Actvate!.mp3")
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
 
-                elapsed = 61
-                score = 0
                 last_elapsed = -1
                 last_score = -1
                 play_music("mi.mp3")
@@ -111,21 +95,25 @@ def main():
                 show_mainscreen(game_engine, high_scores=high_scores)
 
         elif game_ctx.current_mode == "game":
-            elapsed = int(round(60 - game_engine.elapsed_time(), 0))
+            elapsed = int(round(GAME_TIME - game_engine.elapsed_time(), 0))
             score = game_engine.score
             if elapsed < 0:
-                game_screen(screen, 0, score, high_scores[game_level][0])
+                highest_score = high_scores[game_level][0]
+                game_screen(screen, 0, score, highest_score)
                 play_music("airhorn.mp3")
+
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
-                if score > high_scores[game_level][0]:
-                    ret = win_screen(screen)
+
+                if score > highest_score:
+                    user_infos = win_screen(screen)
+                    firstname = user_infos[0]
+
                     high_scores[game_level][0] = score
-                    high_scores[game_level][1] = ret[0]
-                    high_scores[game_level][2] = ret[1]
-                    high_scores[game_level][3] = ret[2]
-                    high_scores[game_level][4] = ret[3]
-                    save_scores(high_scores)
+                    high_scores[game_level][1] = firstname
+
+                    save_scores(high_scores, SCORE_FILE)
+
                     game_ctx.current_mode = "menu"
                     show_mainscreen(game_engine, high_scores=high_scores)
                 else:
