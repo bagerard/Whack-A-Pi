@@ -8,8 +8,6 @@ from screens import game_screen, SIZE, menu_screen, lose_screen, win_screen
 from react import Game
 from scores import save_scores, load_scores
 
-game_level = -1
-
 GAME_TIME = 5
 
 SCORE_CATEGORIES = ["Dev", "F&A", "Op"]
@@ -18,7 +16,6 @@ DEFAULT_HIGH_SCORES = [
     [0, "Rene"],
     [0, "Isaac"],
 ]
-
 SCORE_FILE = "scores.json"
 
 
@@ -29,17 +26,18 @@ class GameContext:
 
 def on_click(game_engine, high_scores, game_ctx):
     print("on_click")
-    global game_level
     click_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
+    game_category = -1
     if game_ctx.current_mode == "menu":
         button_width = SIZE[0] / 3
         if click_pos[1] > SIZE[1] / 3:
-            game_level = int(click_pos[0] / button_width)
+            game_category = int(click_pos[0] / button_width)
             game_ctx.current_mode = "initgame"
     elif game_ctx.current_mode == "postgame":
         game_ctx.current_mode = "menu"
         show_mainscreen(game_engine, high_scores)
+    return game_category
 
 
 def show_mainscreen(game_engine, high_scores) -> None:
@@ -58,6 +56,7 @@ def play_music(mp3_path: str) -> None:
 def main():
     game_ctx = GameContext(current_mode="menu")
     high_scores = load_scores(SCORE_FILE) or DEFAULT_HIGH_SCORES
+    game_category = -1
 
     game_engine = Game(game_time=GAME_TIME)
     show_mainscreen(game_engine, high_scores=high_scores)
@@ -73,7 +72,7 @@ def main():
             game_engine.stop_idle()
             print("game_screen")
 
-            highest_score = high_scores[game_level][0]
+            highest_score = high_scores[game_category][0]
             game_screen(screen, GAME_TIME, 0, highest_score, wait=True)
 
             game_engine.start_loop_btn_thread()  # BAG DEBUG
@@ -90,7 +89,6 @@ def main():
                 game_ctx.current_mode = "game"
                 game_engine.start_game()
             else:
-                print("! if game_engine.ready_wait(30):")
                 game_ctx.current_mode = "menu"
                 show_mainscreen(game_engine, high_scores=high_scores)
 
@@ -98,7 +96,7 @@ def main():
             elapsed = int(round(GAME_TIME - game_engine.elapsed_time(), 0))
             score = game_engine.score
             if elapsed < 0:
-                highest_score = high_scores[game_level][0]
+                highest_score = high_scores[game_category][0]
                 game_screen(screen, 0, score, highest_score)
                 play_music("airhorn.mp3")
 
@@ -109,8 +107,8 @@ def main():
                     user_infos = win_screen(screen)
                     firstname = user_infos[0]
 
-                    high_scores[game_level][0] = score
-                    high_scores[game_level][1] = firstname
+                    high_scores[game_category][0] = score
+                    high_scores[game_category][1] = firstname
 
                     save_scores(high_scores, SCORE_FILE)
 
@@ -121,7 +119,7 @@ def main():
                     game_ctx.current_mode = "postgame"
 
             elif elapsed != last_elapsed or score != last_score:
-                game_screen(screen, elapsed, score, high_scores[game_level][0])
+                game_screen(screen, elapsed, score, high_scores[game_category][0])
                 last_elapsed = elapsed
                 last_score = score
 
@@ -145,7 +143,7 @@ def main():
                 pygame.draw.circle(
                     screen, pygame.Color(255, 10, 10), pos, 2, 0
                 )  # for debugging purposes - adds a small dot where the screen is pressed
-                on_click(game_engine, high_scores, game_ctx)
+                game_category = on_click(game_engine, high_scores, game_ctx)
 
 
 try:

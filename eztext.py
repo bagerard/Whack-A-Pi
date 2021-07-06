@@ -97,7 +97,7 @@ class Input:
 
     def update(self, events):
         """Update the input based on passed events"""
-        if self.hasfocus == False:
+        if not self.hasfocus:
             return
 
         pressed = pygame.key.get_pressed()
