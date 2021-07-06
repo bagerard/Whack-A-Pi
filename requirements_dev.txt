@@ -1,0 +1,4 @@
+black
+pydantic
+pygame
+gpiozero
