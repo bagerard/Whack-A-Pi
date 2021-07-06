@@ -1,62 +1,58 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
+*.pyc
+*~
+*.swp
+__pycache__
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*,cover
-.hypothesis/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
+.project
+.pydevproject
+cpwp/data/*
+.settings
+cpwp/appdata/*
+cpwp/studydata/*
+cpwp/studydata-test/*
+cpwp/logdata/*
+cpwp/cwp/public/test-report.html
+cpwp/cwp/public/css/bundle.css*
+cpwp/cwp/public/css/styles.css*
+cpwp/cwp/public/node_modules/*
+cpwp/cwp/public/yarn.lock
+.pytest_cache/
+build
+bin/
+docs/_build
+dist
+htmlcov
+*.egg-info
+*report.xml
+ghostdriver.log
+.externalToolBuilders/*
+*.egg
 *.log
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-#Ipython Notebook
-.ipynb_checkpoints
+*.pid
+env/*
+*.sqlite
+.RData
+*.ini
+.cache
+!mypy.ini
+*.Rout
+xunit-report-pytest.xml
+/ERR/*
+*.ipynb*
+notebooks/
+contrib/MySQL_UDF/SMART_cast/*.exe
+contrib/MySQL_UDF/SMART_cast/*.so
+.hypothesis
+.awcache/
+.vscode/
+.env
+.idea/*
+.tox/
+.mypy_cache/
+.DS_Store
+celerybeat-schedule
+celerybeat-schedule.bak
+celerybeat-schedule.dir
+celerybeat-schedule.dat
+celerybeat-schedule.db
+.mypy_cache/
