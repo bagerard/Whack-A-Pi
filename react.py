@@ -54,7 +54,7 @@ class Game:
         WHILE WAITING FOR BUTTONS AND PI
         """
         def _loop_btn(buttons):
-            while True:
+            while not self.game_stop.isSet():
                 for btn in buttons:
                     print(f'push button {btn.pin.number}')
                     btn.pin.drive_low()

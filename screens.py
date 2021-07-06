@@ -153,6 +153,7 @@ def win_screen(screen) -> List[str]:
             y=line_pos,
             hasfocus=True,
         )
+    # Note if we add inputbox, we need to increment y by SPACE each time
     inputboxes = [firstname_input]
 
     ib_idx = 0
@@ -192,11 +193,10 @@ def win_screen(screen) -> List[str]:
                         ib_idx = 0
                     inputboxes[ib_idx].set_focus(True)
                 if event.key == pygame.K_RETURN:
-                    if inputboxes[0].value != "" and inputboxes[1].value != "":
-                        ret = []
-                        for ib in inputboxes:
-                            ret.append(ib.value)
-                        return ret
+                    if all(ib.value != "" for ib in inputboxes):
+                        return [ib.value for ib in inputboxes]
+                    else:
+                        print('Missing required input value')
 
         _draw_win_screen(screen)
         inputboxes[ib_idx].update(events)
