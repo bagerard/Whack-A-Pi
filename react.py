@@ -53,14 +53,16 @@ class Game:
         """
         WHILE WAITING FOR BUTTONS AND PI
         """
+
         def _loop_btn(buttons):
             while not self.game_stop.isSet():
                 for btn in buttons:
-                    print(f'push button {btn.pin.number}')
+                    print(f"push button {btn.pin.number}")
                     btn.pin.drive_low()
                     btn.pin.drive_high()
                     time.sleep(0.5)
-        print('start start_loop_btn_thread')
+
+        print("start start_loop_btn_thread")
         Thread(target=_loop_btn, args=(self.buttons,)).start()
 
     @property
@@ -83,7 +85,7 @@ class Game:
         return time.time() - self.start_time
 
     def ready_wait(self, delay):
-        print('ready_wait')
+        print("ready_wait")
         self.lights.off()
 
         btn_idx = 3
@@ -92,7 +94,7 @@ class Game:
         with light_on_led(led):
             btn_pressed = btn.wait_for_press(delay)
 
-        print('btn_pressed')
+        print("btn_pressed")
         return btn_pressed
 
     def start_game(self):
@@ -124,7 +126,7 @@ class Game:
             with light_on_led(led):
                 delay = max(0, self.game_time - self.elapsed_time())
                 # print(delay)
-                print(f'--> run game, waiting on {btn.pin.number}...')
+                print(f"--> run game, waiting on {btn.pin.number}...")
                 if btn.wait_for_press(delay):
                     self.score += 1
 

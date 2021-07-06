@@ -12,7 +12,7 @@ game_level = -1
 
 GAME_TIME = 5
 
-SCORE_CATEGORIES = ['Dev', 'F&A', 'Op']
+SCORE_CATEGORIES = ["Dev", "F&A", "Op"]
 DEFAULT_HIGH_SCORES = [
     [0, "Olivier"],
     [0, "Rene"],
@@ -52,7 +52,7 @@ def show_mainscreen(game_engine, high_scores) -> None:
 def play_music(mp3_path: str) -> None:
     # pygame.mixer.music.load(mp3_path)
     # pygame.mixer.music.play()
-    print(f'fake play music {mp3_path}')
+    print(f"fake play music {mp3_path}")
 
 
 def main():
@@ -62,7 +62,7 @@ def main():
     game_engine = Game(game_time=GAME_TIME)
     show_mainscreen(game_engine, high_scores=high_scores)
 
-    print('start main while loop')
+    print("start main while loop")
     prev_mode = game_ctx.current_mode
     while True:
         if prev_mode != game_ctx.current_mode:
@@ -71,13 +71,13 @@ def main():
 
         if game_ctx.current_mode == "initgame":
             game_engine.stop_idle()
-            print('game_screen')
+            print("game_screen")
 
             highest_score = high_scores[game_level][0]
             game_screen(screen, GAME_TIME, 0, highest_score, wait=True)
 
-            game_engine.start_loop_btn_thread()                         # BAG DEBUG
-            print('game_engine.ready_wait')
+            game_engine.start_loop_btn_thread()  # BAG DEBUG
+            print("game_engine.ready_wait")
 
             if game_engine.ready_wait(min(60, GAME_TIME)):
                 play_music("Robot Wars Clean SFX- 3 2 1 Actvate!.mp3")
@@ -90,7 +90,7 @@ def main():
                 game_ctx.current_mode = "game"
                 game_engine.start_game()
             else:
-                print('! if game_engine.ready_wait(30):')
+                print("! if game_engine.ready_wait(30):")
                 game_ctx.current_mode = "menu"
                 show_mainscreen(game_engine, high_scores=high_scores)
 
@@ -128,21 +128,23 @@ def main():
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                print(f'Event: QUIT')
+                print(f"Event: QUIT")
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                print(f'Event: KEYDOWN')
+                print(f"Event: KEYDOWN")
                 if event.key == pygame.K_F12:
-                    print(f'Event: K_F12')
+                    print(f"Event: K_F12")
                     game_engine.stop_idle()
                     game_engine.stop_game()
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
-                print(f'Event: MOUSEBUTTONUP')
+                print(f"Event: MOUSEBUTTONUP")
                 pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-                pygame.draw.circle(screen, pygame.Color(255, 10, 10), pos, 2, 0) #for debugging purposes - adds a small dot where the screen is pressed
+                pygame.draw.circle(
+                    screen, pygame.Color(255, 10, 10), pos, 2, 0
+                )  # for debugging purposes - adds a small dot where the screen is pressed
                 on_click(game_engine, high_scores, game_ctx)
 
 

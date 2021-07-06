@@ -140,20 +140,19 @@ def _draw_win_screen(screen):
 
 def win_screen(screen) -> List[str]:
     """Returns User input from the win screen"""
-    print('Display win screen')
+    print("Display win screen")
     line_pos = SIZE[1] / 3
-    SPACE = 50
 
     firstname_input = eztext.Input(
-            maxlength=30,
-            color=WHITE,
-            focuscolor=YELLOW,
-            prompt="First: ",
-            x=15,
-            y=line_pos,
-            hasfocus=True,
-        )
-    # Note if we add inputbox, we need to increment y by SPACE each time
+        maxlength=30,
+        color=WHITE,
+        focuscolor=YELLOW,
+        prompt="First: ",
+        x=15,
+        y=line_pos,
+        hasfocus=True,
+    )
+    # Note if we add inputbox, we need to increment y by 50 each time
     inputboxes = [firstname_input]
 
     ib_idx = 0
@@ -196,7 +195,7 @@ def win_screen(screen) -> List[str]:
                     if all(ib.value != "" for ib in inputboxes):
                         return [ib.value for ib in inputboxes]
                     else:
-                        print('Missing required input value')
+                        print("Missing required input value")
 
         _draw_win_screen(screen)
         inputboxes[ib_idx].update(events)
@@ -209,12 +208,12 @@ def lose_screen(screen):
     print("Display Lose screen")
     screen.fill(BLACK, (0, 0, SIZE[0] / 2, SIZE[1]))
     fnt_head = pygame.font.Font(None, 144)
-    lab_head = fnt_head.render("Click", 1, (YELLOW))
+    lab_head = fnt_head.render("Click", 1, YELLOW)
     screen.blit(lab_head, (align_h(lab_head, 2, 0), align_v(lab_head, 3, 0)))
 
-    lab_head = fnt_head.render("to", 1, (YELLOW))
+    lab_head = fnt_head.render("to", 1, YELLOW)
     screen.blit(lab_head, (align_h(lab_head, 2, 0), align_v(lab_head, 3, 1)))
 
-    lab_head = fnt_head.render("Continue", 1, (YELLOW))
+    lab_head = fnt_head.render("Continue", 1, YELLOW)
     screen.blit(lab_head, (align_h(lab_head, 2, 0), align_v(lab_head, 3, 2)))
     pygame.display.flip()
