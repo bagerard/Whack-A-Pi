@@ -1,6 +1,7 @@
 import time
 import traceback
 import sys
+from enum import Enum
 
 import pygame
 
@@ -19,8 +20,15 @@ DEFAULT_HIGH_SCORES = [
 SCORE_FILE = "scores.json"
 
 
+class GAME_MODE(Enum):
+    MENU = 1
+    INITGAME = 2
+    GAME = 3
+    POSTGAME = 4
+
+
 class GameContext:
-    def __init__(self, current_mode):
+    def __init__(self, current_mode: GAME_MODE):
         self.current_mode = current_mode
 
 
@@ -29,13 +37,13 @@ def on_click(game_engine, high_scores, game_ctx):
     click_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
     game_category = -1
-    if game_ctx.current_mode == "menu":
+    if game_ctx.current_mode == GAME_MODE.MENU:
         button_width = SIZE[0] / 3
         if click_pos[1] > SIZE[1] / 3:
             game_category = int(click_pos[0] / button_width)
-            game_ctx.current_mode = "initgame"
-    elif game_ctx.current_mode == "postgame":
-        game_ctx.current_mode = "menu"
+            game_ctx.current_mode = GAME_MODE.INITGAME
+    elif game_ctx.current_mode == GAME_MODE.POSTGAME:
+        game_ctx.current_mode = GAME_MODE.MENU
         show_mainscreen(game_engine, high_scores)
     return game_category
 
@@ -54,7 +62,7 @@ def play_music(mp3_path: str) -> None:
 
 
 def main():
-    game_ctx = GameContext(current_mode="menu")
+    game_ctx = GameContext(current_mode=GAME_MODE.MENU)
     high_scores = load_scores(SCORE_FILE) or DEFAULT_HIGH_SCORES
     game_category = -1
 
@@ -68,7 +76,7 @@ def main():
             print("SWITCH TO MODE", game_ctx.current_mode)
             prev_mode = game_ctx.current_mode
 
-        if game_ctx.current_mode == "initgame":
+        if game_ctx.current_mode == GAME_MODE.INITGAME:
             game_engine.stop_idle()
             print("game_screen")
 
@@ -86,13 +94,13 @@ def main():
                 last_elapsed = -1
                 last_score = -1
                 play_music("mi.mp3")
-                game_ctx.current_mode = "game"
+                game_ctx.current_mode = GAME_MODE.GAME
                 game_engine.start_game()
             else:
-                game_ctx.current_mode = "menu"
+                game_ctx.current_mode = GAME_MODE.MENU
                 show_mainscreen(game_engine, high_scores=high_scores)
 
-        elif game_ctx.current_mode == "game":
+        elif game_ctx.current_mode == GAME_MODE.GAME:
             elapsed = int(round(GAME_TIME - game_engine.elapsed_time(), 0))
             score = game_engine.score
             if elapsed < 0:
@@ -112,11 +120,11 @@ def main():
 
                     save_scores(high_scores, SCORE_FILE)
 
-                    game_ctx.current_mode = "menu"
+                    game_ctx.current_mode = GAME_MODE.MENU
                     show_mainscreen(game_engine, high_scores=high_scores)
                 else:
                     lose_screen(screen)
-                    game_ctx.current_mode = "postgame"
+                    game_ctx.current_mode = GAME_MODE.POSTGAME
 
             elif elapsed != last_elapsed or score != last_score:
                 game_screen(screen, elapsed, score, high_scores[game_category][0])
