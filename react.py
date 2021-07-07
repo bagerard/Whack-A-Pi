@@ -17,6 +17,12 @@ def light_on_led(led):
         led.off()
 
 
+def compute_score(cur_score, time_to_press):
+    MAX_HIT_SCORE = 5
+    increment = max(MAX_HIT_SCORE-time_to_press, 1)
+    return cur_score + increment
+
+
 class Game:
     def __init__(self, game_time: int):
         self.game_time = game_time
@@ -53,8 +59,9 @@ class Game:
         """
         WHILE WAITING FOR BUTTONS AND PI
         """
+
         def _loop_btn(buttons):
-            print('Start dirty loop that press buttons...')
+            print("Start dirty loop that press buttons...")
             while not self.game_stop.isSet():
                 for btn in buttons:
                     print(f"push button {btn.pin.number}")
@@ -108,7 +115,8 @@ class Game:
         print("stop_game")
         self.buttons[self.current_idx].close()
         self.game_stop.set()
-        self.game_thread.join()
+        if self.game_thread is not None:
+            self.game_thread.join()
 
     def _run_game(self):
         print("_run_game")
@@ -124,11 +132,12 @@ class Game:
             btn, led = self._get_button_led(self.current_idx)
 
             with light_on_led(led):
+                start = time.time()
                 delay = max(0, self.game_time - self.elapsed_time())
-                # print(delay)
                 print(f"--> run game, waiting on {btn.pin.number}...")
                 if btn.wait_for_press(delay):
-                    self.score += 1
+                    time_to_press = int(time.time() - start)
+                    self.score = compute_score(self.score, time_to_press)
 
             last_idx = self.current_idx
             elapsed = self.elapsed_time()

@@ -48,7 +48,13 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     top = line_pos
     max_width = SIZE[0] / 3
     max_height = SIZE[1] - top
-    for idx, (score_category, user_score) in enumerate(categories_highest_score.items()):
+
+    ranked_categories = [(cat, user_score) for cat, user_score in categories_highest_score.items()]
+    ranked_categories.sort(key=lambda d: d[1].highest_score, reverse=True)
+
+    for idx, (score_category, user_score) in enumerate(
+        categories_highest_score.items()
+    ):
 
         rect = left, top, width, height = (
             (max_width * idx) + 10,
@@ -58,17 +64,23 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         )
         pygame.draw.rect(screen, WHITE, rect, 1)
 
+        if score_category == ranked_categories[0][0]:
+            crown_img = pygame.image.load('assets/crown_smol.png').convert_alpha()
+            screen.blit(crown_img, (left+(width/2)-crown_img.get_width()/2, top-(crown_img.get_height()/2)-4))
+
         line_pos = top  # reset the vertical cursor
         line_pos += 45
         lab_title = fnt_title.render(score_category, 1, WHITE)
         screen.blit(lab_title, (align_h(lab_title, 3, idx), line_pos))
 
         line_pos += lab_title.get_height() + 30
-        lab_score = fnt_score.render("{:0>3d}".format(user_score.highest_score), 1, BLUE)
+        lab_score = fnt_score.render(
+            "{:0>3d}".format(user_score.highest_score), 1, BLUE
+        )
         screen.blit(lab_score, (align_h(lab_score, 3, idx), line_pos))
 
         line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(user_score.username, 1, ORANGE)
+        lab_name1 = fnt_title.render(f"{user_score.username} ({user_score.n_games})", 1, ORANGE)
         screen.blit(lab_name1, (align_h(lab_name1, 3, idx), line_pos))
 
         # old Lastname
@@ -107,7 +119,9 @@ def game_screen(screen, elapsed, score, hi_user_score: UserScore, wait=False):
     lab_hi_title = fnt_subtitle.render("Hi-Score:", 1, WHITE)
 
     fnt_hiscore = pygame.font.Font("digital-7 (mono).ttf", 144)
-    lab_hi_score = fnt_hiscore.render("{:0>3d}".format(hi_user_score.highest_score), 1, BLUE)
+    lab_hi_score = fnt_hiscore.render(
+        "{:0>3d}".format(hi_user_score.highest_score), 1, BLUE
+    )
 
     score_top = SIZE[1] - lab_hi_score.get_height() - 30
     hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2

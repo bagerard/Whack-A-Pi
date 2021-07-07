@@ -62,15 +62,15 @@ def main():
 
     game_engine = Game(game_time=GAME_TIME)
     show_mainscreen(
-        game_engine,
-        categories_highest_score=score_repo.get_highest_scores_by_cat
-        )
+        game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat
+    )
 
     game_category = -1
 
     print("start main while loop")
     prev_mode = game_ctx.current_mode
     while True:
+        time.sleep(0.05)
         if prev_mode != game_ctx.current_mode:
             print("SWITCH TO MODE", game_ctx.current_mode)
             prev_mode = game_ctx.current_mode
@@ -97,7 +97,10 @@ def main():
                 game_engine.start_game()
             else:
                 game_ctx.current_mode = GAME_MODE.MENU
-                show_mainscreen(game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat)
+                show_mainscreen(
+                    game_engine,
+                    categories_highest_score=score_repo.get_highest_scores_by_cat,
+                )
 
         elif game_ctx.current_mode == GAME_MODE.GAME:
             elapsed = int(round(GAME_TIME - game_engine.elapsed_time(), 0))
@@ -117,13 +120,21 @@ def main():
                     score_repo.update_user_score(game_category, firstname, score)
 
                     game_ctx.current_mode = GAME_MODE.MENU
-                    show_mainscreen(game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat)
+                    show_mainscreen(
+                        game_engine,
+                        categories_highest_score=score_repo.get_highest_scores_by_cat,
+                    )
                 else:
                     lose_screen(screen)
                     game_ctx.current_mode = GAME_MODE.POSTGAME
 
             elif elapsed != last_elapsed or score != last_score:
-                game_screen(screen, elapsed, score, score_repo.get_highest_scores_by_cat[game_category])
+                game_screen(
+                    screen,
+                    elapsed,
+                    score,
+                    score_repo.get_highest_scores_by_cat[game_category],
+                )
                 last_elapsed = elapsed
                 last_score = score
 
@@ -147,7 +158,9 @@ def main():
                 pygame.draw.circle(
                     screen, pygame.Color(255, 10, 10), pos, 2, 0
                 )  # for debugging purposes - adds a small dot where the screen is pressed
-                game_category = on_click(game_engine, game_ctx, score_repo.get_highest_scores_by_cat)
+                game_category = on_click(
+                    game_engine, game_ctx, score_repo.get_highest_scores_by_cat
+                )
 
 
 try:

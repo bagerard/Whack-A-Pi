@@ -9,12 +9,14 @@ from typing import List, Dict
 
 from random_username.generate import generate_username
 
-SCORE_CATEGORIES = ["Dev", "F&A", "Op"]
+SCORE_CATEGORIES = ["Product", "F&A", "Ops"]
 
 DEFAULT_RAW_HIGH_SCORES = {
-    cat: [{
-        "username": generate_username(1)[0],
-    }]
+    cat: [
+        {
+            "username": generate_username(1)[0],
+        }
+    ]
     for cat in SCORE_CATEGORIES
 }
 
@@ -51,10 +53,14 @@ class ScoreRepository:
         return {cat: scores[0] for cat, scores in self._scores.items()}
 
     def update_user_score(self, cat, username, score) -> None:
-        existing_user_score = next((uc.username == username for uc in self._scores[cat]), None)
+        existing_user_score = next(
+            (uc for uc in self._scores[cat] if uc.username == username), None
+        )
         if existing_user_score:
             existing_user_score.n_games += 1
-            existing_user_score.highest_score = max(existing_user_score.highest_score, score)
+            existing_user_score.highest_score = max(
+                existing_user_score.highest_score, score
+            )
             existing_user_score.latest_game = str(dt.datetime.now())
         else:
             new_score = UserScore(username=username, highest_score=score)
@@ -73,9 +79,9 @@ class ScoreRepository:
     @staticmethod
     def _to_raw_scores(raw_scores: dict) -> dict:
         return {
-                    score_cat: [asdict(uc) for uc in user_scores]
-                    for score_cat, user_scores in raw_scores.items()
-                }
+            score_cat: [asdict(uc) for uc in user_scores]
+            for score_cat, user_scores in raw_scores.items()
+        }
 
 
 def save_scores(high_scores: dict, score_filepath: str) -> None:
@@ -91,4 +97,4 @@ def load_scores(score_filepath):
         with open(score_filepath, "r", encoding="utf-8") as f:
             print("Load existing scores")
             return json.load(f)
-    print('No existing scores found')
+    print("No existing scores found")
