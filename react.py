@@ -53,8 +53,8 @@ class Game:
         """
         WHILE WAITING FOR BUTTONS AND PI
         """
-
         def _loop_btn(buttons):
+            print('Start dirty loop that press buttons...')
             while not self.game_stop.isSet():
                 for btn in buttons:
                     print(f"push button {btn.pin.number}")
@@ -100,7 +100,7 @@ class Game:
     def start_game(self):
         print("start_game")
         self.game_stop.clear()
-        self.game_thread = Thread(target=self._rungame)
+        self.game_thread = Thread(target=self._run_game)
         self.start_time = time.time()
         self.game_thread.start()
 
@@ -110,8 +110,8 @@ class Game:
         self.game_stop.set()
         self.game_thread.join()
 
-    def _rungame(self):
-        print("_rungame")
+    def _run_game(self):
+        print("_run_game")
         elapsed = 0
         last_idx = -1
         self.score = 0
@@ -150,10 +150,9 @@ class Game:
         cols = [[5], [0, 2, 9], [6], [3, 10, 12], [7], [1, 4, 11], [8]]
         pulse = [[6, 7], [3, 10], [2, 4, 9, 11], [5, 8], [0, 1, 12]]
 
-        idle_pattern = 3
         while not self.idle_stop.isSet():
             idle_pattern = randint(0, max_patterns)
-            # idle_pattern += 1
+
             if idle_pattern > max_patterns:
                 break
 

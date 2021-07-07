@@ -2,3 +2,4 @@ black
 pydantic
 pygame
 gpiozero
+random-username

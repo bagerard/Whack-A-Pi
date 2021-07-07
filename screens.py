@@ -1,10 +1,12 @@
-from typing import List
+from typing import List, Dict
 
 import pygame
 import eztext
 import sys
 
 # set SIZE of the screen
+from scores import UserScore
+
 SIZE = (1280, 800)
 width, height = SIZE
 
@@ -30,7 +32,7 @@ def align_v(label, rows=1, row=0, height=SIZE[1]):
     return ((row_height - label.get_height()) / 2) + row_height * row
 
 
-def menu_screen(screen, scores: List, scores_categories: List[str]):
+def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     global top
 
     line_pos = 15
@@ -46,9 +48,10 @@ def menu_screen(screen, scores: List, scores_categories: List[str]):
     top = line_pos
     max_width = SIZE[0] / 3
     max_height = SIZE[1] - top
-    for i, score_category in enumerate(scores_categories):
+    for idx, (score_category, user_score) in enumerate(categories_highest_score.items()):
+
         rect = left, top, width, height = (
-            (max_width * i) + 10,
+            (max_width * idx) + 10,
             top,
             max_width - 20,
             max_height - 10,
@@ -58,25 +61,25 @@ def menu_screen(screen, scores: List, scores_categories: List[str]):
         line_pos = top  # reset the vertical cursor
         line_pos += 45
         lab_title = fnt_title.render(score_category, 1, WHITE)
-        screen.blit(lab_title, (align_h(lab_title, 3, i), line_pos))
+        screen.blit(lab_title, (align_h(lab_title, 3, idx), line_pos))
 
         line_pos += lab_title.get_height() + 30
-        lab_score = fnt_score.render("{:0>3d}".format(scores[i][0]), 1, BLUE)
-        screen.blit(lab_score, (align_h(lab_score, 3, i), line_pos))
+        lab_score = fnt_score.render("{:0>3d}".format(user_score.highest_score), 1, BLUE)
+        screen.blit(lab_score, (align_h(lab_score, 3, idx), line_pos))
 
         line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(scores[i][1], 1, ORANGE)
-        screen.blit(lab_name1, (align_h(lab_name1, 3, i), line_pos))
+        lab_name1 = fnt_title.render(user_score.username, 1, ORANGE)
+        screen.blit(lab_name1, (align_h(lab_name1, 3, idx), line_pos))
 
         # old Lastname
         # line_pos += lab_name1.get_height() + 15
-        # lab_name2 = fnt_title.render(scores[i][2], 1, ORANGE)
-        # screen.blit(lab_name2, (align_h(lab_name2, 3, i), line_pos))
+        # lab_name2 = fnt_title.render(user_score.somethingelse, 1, ORANGE)
+        # screen.blit(lab_name2, (align_h(lab_name2, 3, idx), line_pos))
 
     pygame.display.flip()
 
 
-def game_screen(screen, elapsed, score, hiscore, wait=False):
+def game_screen(screen, elapsed, score, hi_user_score: UserScore, wait=False):
     screen.fill(BLACK)  # change the colours if needed
     fnt_title = pygame.font.Font(None, 144)
     lab_time_title = fnt_title.render("Time", 1, WHITE)
@@ -104,7 +107,7 @@ def game_screen(screen, elapsed, score, hiscore, wait=False):
     lab_hi_title = fnt_subtitle.render("Hi-Score:", 1, WHITE)
 
     fnt_hiscore = pygame.font.Font("digital-7 (mono).ttf", 144)
-    lab_hi_score = fnt_hiscore.render("{:0>3d}".format(hiscore), 1, BLUE)
+    lab_hi_score = fnt_hiscore.render("{:0>3d}".format(hi_user_score.highest_score), 1, BLUE)
 
     score_top = SIZE[1] - lab_hi_score.get_height() - 30
     hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2
