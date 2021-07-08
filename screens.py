@@ -22,6 +22,9 @@ GREEN = 0, 255, 0
 top = 0
 
 
+CLOCK_FONT_PATH = "assets/digital-7 (mono).ttf"
+
+
 def align_h(label, cols=1, col=0, width=SIZE[0]):
     col_width = width / cols
     return ((col_width - label.get_width()) / 2) + col_width * col
@@ -43,7 +46,7 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     screen.blit(lab_head, (align_h(lab_head), line_pos))
     line_pos += lab_head.get_height() + 60
 
-    fnt_score = pygame.font.Font("digital-7 (mono).ttf", 200)
+    fnt_score = pygame.font.Font(CLOCK_FONT_PATH, 200)
 
     top = line_pos
     max_width = SIZE[0] / 3
@@ -65,7 +68,7 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         pygame.draw.rect(screen, WHITE, rect, 1)
 
         if score_category == ranked_categories[0][0]:
-            crown_img = pygame.image.load('assets/crown_smol.png').convert_alpha()
+            crown_img = pygame.image.load('assets/crown.png').convert_alpha()
             screen.blit(crown_img, (left+(width/2)-crown_img.get_width()/2, top-(crown_img.get_height()/2)-4))
 
         line_pos = top  # reset the vertical cursor
@@ -91,7 +94,7 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     pygame.display.flip()
 
 
-def game_screen(screen, elapsed, score, hi_user_score: UserScore, wait=False):
+def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champion: UserScore, wait=False):
     screen.fill(BLACK)  # change the colours if needed
     fnt_title = pygame.font.Font(None, 144)
     lab_time_title = fnt_title.render("Time", 1, WHITE)
@@ -107,7 +110,7 @@ def game_screen(screen, elapsed, score, hi_user_score: UserScore, wait=False):
             lab_wait, (align_h(lab_wait, 1, 0), 15 + lab_score_title.get_height())
         )
 
-    font = pygame.font.Font("digital-7 (mono).ttf", 432)
+    font = pygame.font.Font(CLOCK_FONT_PATH, 432)
 
     lab_time = font.render("{:0>2d}".format(elapsed), 1, ORANGE)
     screen.blit(lab_time, (align_h(lab_time, 2, 0), align_v(lab_time)))
@@ -115,19 +118,35 @@ def game_screen(screen, elapsed, score, hi_user_score: UserScore, wait=False):
     lab_score = font.render("{:0>3d}".format(score), 1, BLUE)
     screen.blit(lab_score, (align_h(lab_score, 2, 1), align_v(lab_score)))
 
-    fnt_subtitle = pygame.font.Font(None, 120)
-    lab_hi_title = fnt_subtitle.render("Hi-Score:", 1, WHITE)
+    # Dept Champion
+    fnt_subtitle = pygame.font.Font(None, 60)
+    lab_hi_title = fnt_subtitle.render("Dept. Hi-Score:", 1, WHITE)
 
-    fnt_hiscore = pygame.font.Font("digital-7 (mono).ttf", 144)
+    fnt_hiscore = pygame.font.Font(CLOCK_FONT_PATH, 72)
     lab_hi_score = fnt_hiscore.render(
-        "{:0>3d}".format(hi_user_score.highest_score), 1, BLUE
+        "{:0>3d}".format(cat_champion.highest_score), 1, BLUE
     )
 
-    score_top = SIZE[1] - lab_hi_score.get_height() - 30
+    score_top = SIZE[1] - lab_hi_score.get_height() - 80
     hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2
 
     screen.blit(lab_hi_title, (align_h(lab_hi_title, 4, 2) + 25, hi_top))
     screen.blit(lab_hi_score, (align_h(lab_hi_score, 4, 3), score_top))
+
+    # Global Champion
+    fnt_subtitle2 = pygame.font.Font(None, 40)
+    lab_hi_title2 = fnt_subtitle2.render("Global Hi-Score:", 1, WHITE)
+
+    fnt_hiscore2 = pygame.font.Font(CLOCK_FONT_PATH, 52)
+    lab_hi_score2 = fnt_hiscore2.render(
+        "{:0>3d}".format(overall_champion.highest_score), 1, BLUE
+    )
+
+    score_top = SIZE[1] - lab_hi_score.get_height() - 20
+    hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2
+
+    screen.blit(lab_hi_title2, (align_h(lab_hi_title, 4, 2) + 25, hi_top))
+    screen.blit(lab_hi_score2, (align_h(lab_hi_score, 4, 3), score_top))
 
     pygame.display.flip()
 
@@ -157,7 +176,6 @@ def _draw_win_screen(screen):
 
 def win_screen(screen) -> List[str]:
     """Returns User input from the win screen"""
-    print("Display win screen")
     line_pos = SIZE[1] / 3
 
     firstname_input = eztext.Input(
@@ -222,7 +240,6 @@ def win_screen(screen) -> List[str]:
 
 
 def lose_screen(screen):
-    print("Display Lose screen")
     screen.fill(BLACK, (0, 0, SIZE[0] / 2, SIZE[1]))
     fnt_head = pygame.font.Font(None, 144)
     lab_head = fnt_head.render("Click", 1, YELLOW)

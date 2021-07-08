@@ -1,9 +1,16 @@
 import time
+from dataclasses import dataclass, field
 from random import randint
 from threading import Thread, Event
 from contextlib import contextmanager
+from typing import List
+import statistics
+import math
 
 from gpiozero import LEDBoard, Button
+
+
+DEFAULT_HIT_TIME = 10.0
 
 
 @contextmanager
@@ -17,13 +24,34 @@ def light_on_led(led):
         led.off()
 
 
-def compute_score(cur_score, time_to_press):
+def compute_score_increment(time_to_hit: float):
     MAX_HIT_SCORE = 5
-    increment = max(MAX_HIT_SCORE-time_to_press, 1)
-    return cur_score + increment
+    rounded_hit_time = math.floor(time_to_hit)
+    return max(MAX_HIT_SCORE-rounded_hit_time, 1)
 
 
-class Game:
+@dataclass
+class GameResult:
+    score: int = 0
+    response_times: List[float] = field(default_factory=list)
+
+    def register_new_hit(self, hit_time: float):
+        self.score += compute_score_increment(hit_time)
+        self.response_times.append(hit_time)
+
+    @property
+    def mean_hit_time(self):
+        if self.response_times:
+            return statistics.mean(self.response_times)
+        else:
+            return DEFAULT_HIT_TIME
+
+    @property
+    def n_hits(self):
+        return len(self.response_times)
+
+
+class GameEngine:
     def __init__(self, game_time: int):
         self.game_time = game_time
 
@@ -45,7 +73,7 @@ class Game:
         ]
 
         self.start_time = 0
-        self.score = 0
+        self.game_result = GameResult()
         self.game_thread = None
         self.idle_thread = None
         self.idle_stop = Event()
@@ -122,7 +150,9 @@ class Game:
         print("_run_game")
         elapsed = 0
         last_idx = -1
-        self.score = 0
+        self.game_result = GameResult()
+
+        self.user_response_time = []
 
         while elapsed < self.game_time and not self.game_stop.isSet():
             # Find a button that is not the last one
@@ -136,8 +166,8 @@ class Game:
                 delay = max(0, self.game_time - self.elapsed_time())
                 print(f"--> run game, waiting on {btn.pin.number}...")
                 if btn.wait_for_press(delay):
-                    time_to_press = int(time.time() - start)
-                    self.score = compute_score(self.score, time_to_press)
+                    time_to_press = time.time() - start
+                    self.game_result.register_new_hit(time_to_press)
 
             last_idx = self.current_idx
             elapsed = self.elapsed_time()
