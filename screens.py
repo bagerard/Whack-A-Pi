@@ -267,7 +267,13 @@ def win_screen(screen) -> List[str]:
     ib_idx = 0  # selected input box index
 
     submit_btn = _draw_win_screen(screen)
-    quickpick_btn = None
+    fnt_head = pygame.font.Font(None, 40)
+    lab_btn = fnt_head.render(
+        "bagerard",
+        1,
+        YELLOW,
+    )
+    quickpick_btn = QuickPickButton("bagerard", lab_btn, x=align_h(lab_btn, 6, 0) + 40, y=align_v(lab_btn, 6, 3))
 
     while True:
         clock.tick(FPS)
@@ -319,13 +325,6 @@ def win_screen(screen) -> List[str]:
             ib.draw(screen)
 
         # QuickPick test
-        fnt_head = pygame.font.Font(None, 40)
-        lab_btn = fnt_head.render(
-            "bagerard",
-            1,
-            YELLOW,
-        )
-        quickpick_btn = QuickPickButton("bagerard", lab_btn, x=align_h(lab_btn, 6, 0) + 40, y=align_v(lab_btn, 6, 3))
         quickpick_btn.draw(screen)
         ####
 
