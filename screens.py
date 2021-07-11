@@ -220,8 +220,8 @@ def _box_clicked(item, pos: Tuple[int, int]):
 
 
 class QuickPickButton:
-    def __init__(self, value, rendered_txt, x, y):
-        self.rendered_btn_txt = rendered_txt
+    def __init__(self, value, rendered_btn_txt, x, y):
+        self.rendered_btn_txt = rendered_btn_txt
         self.value = value
         self.btn_label_x = x
         self.btn_label_y = y
@@ -267,13 +267,31 @@ def win_screen(screen) -> List[str]:
     ib_idx = 0  # selected input box index
 
     submit_btn = _draw_win_screen(screen)
-    fnt_head = pygame.font.Font(None, 40)
-    lab_btn = fnt_head.render(
-        "bagerard",
-        1,
-        YELLOW,
-    )
-    quickpick_btn = QuickPickButton("bagerard", lab_btn, x=align_h(lab_btn, 6, 0) + 40, y=align_v(lab_btn, 6, 3))
+
+    # QuickPick buttons setup
+    usernames = [f'bagerard-{i}' for i in range(10)]
+    quickpick_btns = []
+    qp_pos = [
+        ((8, 0), (6, 2)),
+        ((8, 1), (6, 2)),
+        ((8, 2), (6, 2)),
+        ((8, 0), (6, 3)),
+        ((8, 1), (6, 3)),
+        ((8, 2), (6, 3)),
+    ]
+    for idx, username in enumerate(usernames[:6]):
+        qp_font = pygame.font.Font(None, 30)
+        qp_btn = qp_font.render(username, 1, YELLOW)
+
+        h_cols, v_cols = qp_pos[idx]
+        quickpick_btns.append(
+            QuickPickButton(
+                username,
+                qp_btn,
+                x=align_h(qp_btn, *h_cols) + 20,
+                y=align_v(qp_btn, *v_cols)
+            )
+        )
 
     while True:
         clock.tick(FPS)
@@ -296,9 +314,9 @@ def win_screen(screen) -> List[str]:
                         ib_idx = i
                         break
 
-                if quickpick_btn:
-                    quickpick_selected = _box_clicked(quickpick_btn, pos)
-                    inputboxes[0].value = "bagerard"
+                # if quickpick_btn:
+                #     quickpick_selected = _box_clicked(quickpick_btn, pos)
+                #     inputboxes[0].value = "bagerard"
 
             if event.type == pygame.KEYDOWN:
 
@@ -324,9 +342,9 @@ def win_screen(screen) -> List[str]:
         for ib in inputboxes:
             ib.draw(screen)
 
-        # QuickPick test
-        quickpick_btn.draw(screen)
-        ####
+        # username QuickPick
+        for quickpick_btn in quickpick_btns:
+            quickpick_btn.draw(screen)
 
         pygame.display.flip()
 
