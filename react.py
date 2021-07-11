@@ -27,7 +27,7 @@ def light_on_led(led):
 def compute_score_increment(time_to_hit: float):
     MAX_HIT_SCORE = 5
     rounded_hit_time = math.floor(time_to_hit)
-    return max(MAX_HIT_SCORE-rounded_hit_time, 1)
+    return max(MAX_HIT_SCORE - rounded_hit_time, 1)
 
 
 @dataclass

@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import pygame
 import eztext
@@ -24,6 +24,8 @@ top = 0
 
 CLOCK_FONT_PATH = "assets/digital-7 (mono).ttf"
 
+clock = pygame.time.Clock()
+FPS = 30
 
 def align_h(label, cols=1, col=0, width=SIZE[0]):
     col_width = width / cols
@@ -52,7 +54,9 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     max_width = SIZE[0] / 3
     max_height = SIZE[1] - top
 
-    ranked_categories = [(cat, user_score) for cat, user_score in categories_highest_score.items()]
+    ranked_categories = [
+        (cat, user_score) for cat, user_score in categories_highest_score.items()
+    ]
     ranked_categories.sort(key=lambda d: d[1].highest_score, reverse=True)
 
     for idx, (score_category, user_score) in enumerate(
@@ -68,8 +72,14 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         pygame.draw.rect(screen, WHITE, rect, 1)
 
         if score_category == ranked_categories[0][0]:
-            crown_img = pygame.image.load('assets/crown.png').convert_alpha()
-            screen.blit(crown_img, (left+(width/2)-crown_img.get_width()/2, top-(crown_img.get_height()/2)-4))
+            crown_img = pygame.image.load("assets/crown.png").convert_alpha()
+            screen.blit(
+                crown_img,
+                (
+                    left + (width / 2) - crown_img.get_width() / 2,
+                    top - (crown_img.get_height() / 2) - 4,
+                ),
+            )
 
         line_pos = top  # reset the vertical cursor
         line_pos += 45
@@ -77,13 +87,13 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         screen.blit(lab_title, (align_h(lab_title, 3, idx), line_pos))
 
         line_pos += lab_title.get_height() + 30
-        lab_score = fnt_score.render(
-            "{:0>3d}".format(user_score.highest_score), 1, BLUE
-        )
+        lab_score = fnt_score.render(f"{user_score.highest_score:0>3d}", 1, BLUE)
         screen.blit(lab_score, (align_h(lab_score, 3, idx), line_pos))
 
         line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(f"{user_score.username} ({user_score.n_games})", 1, ORANGE)
+        lab_name1 = fnt_title.render(
+            f"{user_score.username}", 1, ORANGE
+        )
         screen.blit(lab_name1, (align_h(lab_name1, 3, idx), line_pos))
 
         # old Lastname
@@ -94,7 +104,14 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
     pygame.display.flip()
 
 
-def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champion: UserScore, wait=False):
+def game_screen(
+    screen,
+    elapsed,
+    score,
+    cat_champion: UserScore,
+    overall_champion: UserScore,
+    wait=False,
+):
     screen.fill(BLACK)  # change the colours if needed
     fnt_title = pygame.font.Font(None, 144)
     lab_time_title = fnt_title.render("Time", 1, WHITE)
@@ -112,10 +129,10 @@ def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champio
 
     font = pygame.font.Font(CLOCK_FONT_PATH, 432)
 
-    lab_time = font.render("{:0>2d}".format(elapsed), 1, ORANGE)
+    lab_time = font.render(f"{elapsed:0>2d}", 1, ORANGE)
     screen.blit(lab_time, (align_h(lab_time, 2, 0), align_v(lab_time)))
 
-    lab_score = font.render("{:0>3d}".format(score), 1, BLUE)
+    lab_score = font.render(f"{score:0>3d}", 1, BLUE)
     screen.blit(lab_score, (align_h(lab_score, 2, 1), align_v(lab_score)))
 
     # Dept Champion
@@ -123,9 +140,7 @@ def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champio
     lab_hi_title = fnt_subtitle.render("Dept. Hi-Score:", 1, WHITE)
 
     fnt_hiscore = pygame.font.Font(CLOCK_FONT_PATH, 72)
-    lab_hi_score = fnt_hiscore.render(
-        "{:0>3d}".format(cat_champion.highest_score), 1, BLUE
-    )
+    lab_hi_score = fnt_hiscore.render(f"{cat_champion.highest_score:0>3d}", 1, BLUE)
 
     score_top = SIZE[1] - lab_hi_score.get_height() - 80
     hi_top = score_top + (lab_hi_score.get_height() - lab_hi_title.get_height()) / 2
@@ -139,7 +154,7 @@ def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champio
 
     fnt_hiscore2 = pygame.font.Font(CLOCK_FONT_PATH, 52)
     lab_hi_score2 = fnt_hiscore2.render(
-        "{:0>3d}".format(overall_champion.highest_score), 1, BLUE
+        f"{overall_champion.highest_score:0>3d}", 1, BLUE
     )
 
     score_top = SIZE[1] - lab_hi_score.get_height() - 20
@@ -152,10 +167,9 @@ def game_screen(screen, elapsed, score, cat_champion: UserScore, overall_champio
 
 
 def _draw_win_screen(screen):
-    global btn
     screen.fill(BLACK, (0, 0, SIZE[0] / 2, SIZE[1]))
     fnt_head = pygame.font.Font(None, 144)
-    lab_head = fnt_head.render("High Score!", 1, (YELLOW))
+    lab_head = fnt_head.render("High Score!", 1, YELLOW)
     screen.blit(lab_head, (align_h(lab_head, 2, 0), 15))
 
     lab_btn = fnt_head.render(
@@ -166,12 +180,16 @@ def _draw_win_screen(screen):
     x = align_h(lab_btn, 2, 0)
     y = SIZE[1] - 30 - lab_btn.get_height()
     screen.blit(lab_btn, (x, y))
-    btn = pygame.draw.rect(
+    return pygame.draw.rect(
         screen,
         YELLOW,
         (x - 15, y - 15, lab_btn.get_width() + 30, lab_btn.get_height() + 30),
         1,
     )
+
+
+def _box_clicked(item, pos: Tuple[int, int]):
+    return item.top <= pos[1] <= item.bottom and item.left <= pos[0] <= item.right
 
 
 def win_screen(screen) -> List[str]:
@@ -182,57 +200,58 @@ def win_screen(screen) -> List[str]:
         maxlength=30,
         color=WHITE,
         focuscolor=YELLOW,
-        prompt="First: ",
+        prompt="Username: ",
         x=15,
         y=line_pos,
         hasfocus=True,
     )
     # Note if we add inputbox, we need to increment y by 50 each time
     inputboxes = [firstname_input]
+    ib_idx = 0  # selected input box index
 
-    ib_idx = 0
+    submit_btn = _draw_win_screen(screen)
+
     while True:
-        # clock.tick(30)
+        clock.tick(FPS)
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-                if btn.top <= pos[1] <= btn.bottom:
-                    if btn.left <= pos[0] <= btn.right:
-                        ret = []
-                        for ib in inputboxes:
-                            ret.append(ib.value)
-                        return ret
 
-                # print (pos)
-                for i in range(0, len(inputboxes)):
-                    ib = inputboxes[i]
-                    print(ib.top, ib.bottom, ib.left, ib.right)
-                    if ib.top <= pos[1] <= ib.bottom:
-                        if ib.left <= pos[0] <= ib.right:
-                            # print(ib.prompt)
-                            inputboxes[ib_idx].set_focus(False)
-                            ib.set_focus(True)
-                            ib_idx = i
-                            break
+                submit_btn_clicked = _box_clicked(submit_btn, pos)
+                if submit_btn_clicked:
+                    print("Submit button clicked")
+                    return [ib.value for ib in inputboxes]
+
+                for i, ib in enumerate(inputboxes):
+                    ib_selected = _box_clicked(ib, pos)
+                    if ib_selected:
+                        print(f'Input box {i} selected - change focus')
+                        inputboxes[ib_idx].set_focus(False)
+                        ib.set_focus(True)
+                        ib_idx = i
+                        break
 
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_F12:
                     pygame.quit()
                     sys.exit()
+
                 if event.key == pygame.K_TAB:
                     inputboxes[ib_idx].set_focus(False)
                     ib_idx += 1
                     if ib_idx >= len(inputboxes):
                         ib_idx = 0
                     inputboxes[ib_idx].set_focus(True)
+
                 if event.key == pygame.K_RETURN:
                     if all(ib.value != "" for ib in inputboxes):
                         return [ib.value for ib in inputboxes]
                     else:
                         print("Missing required input value")
 
-        _draw_win_screen(screen)
+        submit_btn = _draw_win_screen(screen)
         inputboxes[ib_idx].update(events)
         for ib in inputboxes:
             ib.draw(screen)

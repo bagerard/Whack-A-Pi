@@ -35,7 +35,7 @@ class Input:
             ["color", "(0,0,0)"],
             [
                 "restricted",
-                "'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&\\'()*+,-./:;<=>?@[\]^_`{|}~'",
+                "'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&\\'()*+,-./:;<=>?@[\\]^_`{|}~'",
             ],
             ["maxlength", "-1"],
             ["prompt", "''"],

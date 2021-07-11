@@ -26,8 +26,18 @@ class UserScore:
     username: str
     highest_score: int = 0
     best_mean_hit_time: float = 100
-    latest_game: str = field(default_factory=lambda: str(dt.datetime.now()))
+    latest_game: str = field(default_factory=lambda: str(dt.datetime.now())[:10])
     n_games: int = 1
+
+    def register_new_game_score(self, score, mean_hit_time):
+        self.n_games += 1
+        self.highest_score = max(
+            self.highest_score, score
+        )
+        self.latest_game = str(dt.datetime.now())[:10]
+        self.best_mean_hit_time = min(
+            self.best_mean_hit_time, mean_hit_time
+        )
 
 
 def sort_by_score(user_scores: List[UserScore]):
@@ -36,7 +46,7 @@ def sort_by_score(user_scores: List[UserScore]):
 
 
 class ScoreRepository:
-    def __init__(self, filepath: str, backup_files:bool):
+    def __init__(self, filepath: str, backup_files: bool):
         self.filepath = filepath
         self.backup_files = backup_files
         raw_scores = load_scores(filepath) or DEFAULT_RAW_HIGH_SCORES
@@ -59,19 +69,18 @@ class ScoreRepository:
     def overall_champion(self) -> Dict[str, UserScore]:
         return sort_by_score(self.get_highest_scores_by_cat.values())[0]
 
-    def update_user_score(self, cat: str, username: str, score: int, mean_hit_time: float) -> None:
+    def update_user_score(
+        self, cat: str, username: str, score: int, mean_hit_time: float
+    ) -> None:
         existing_user_score: UserScore = next(
             (uc for uc in self._scores[cat] if uc.username == username), None
         )
         if existing_user_score:
-            existing_user_score.n_games += 1
-            existing_user_score.highest_score = max(
-                existing_user_score.highest_score, score
-            )
-            existing_user_score.latest_game = str(dt.datetime.now())
-            existing_user_score.best_mean_hit_time = min(existing_user_score.best_mean_hit_time, mean_hit_time)
+            existing_user_score.register_new_game_score(score=score, mean_hit_time=mean_hit_time)
         else:
-            new_score = UserScore(username=username, highest_score=score, best_mean_hit_time=mean_hit_time)
+            new_score = UserScore(
+                username=username, highest_score=score, best_mean_hit_time=mean_hit_time
+            )
             self._scores[cat].append(new_score)
             self._scores[cat] = sort_by_score(self._scores[cat])
 
@@ -102,7 +111,7 @@ def save_scores(high_scores: dict, score_filepath: str, backup_files: bool) -> N
 
 def load_scores(score_filepath):
     if os.access(score_filepath, os.R_OK):
-        with open(score_filepath, "r", encoding="utf-8") as f:
+        with open(score_filepath, encoding="utf-8") as f:
             print("Load existing scores")
             return json.load(f)
     print("No existing scores found")
