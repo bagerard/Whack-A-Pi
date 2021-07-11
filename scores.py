@@ -27,15 +27,24 @@ class UserScore:
     username: str
     highest_score: int = 0
     best_mean_hit_time: float = 100
-    latest_game: str = field(default_factory=lambda: str(dt.datetime.now())[:10])
+    latest_game: str = field(default_factory=lambda: str(dt.datetime.now()))
     n_games: int = 1
+
+    def pretty_dict(self):
+        return {
+            "username": self.username,
+            "highest score": self.highest_score,
+            "n games": self.n_games,
+            "latest game": self.latest_game[:10],
+            "best mean hit time": round(self.best_mean_hit_time, 2),
+        }
 
     def register_new_game_score(self, score, mean_hit_time):
         self.n_games += 1
         self.highest_score = max(
             self.highest_score, score
         )
-        self.latest_game = str(dt.datetime.now())[:10]
+        self.latest_game = str(dt.datetime.now())
         best_mean_hit_time = min(
             self.best_mean_hit_time, mean_hit_time
         )
@@ -47,6 +56,11 @@ def sort_by_score(user_scores: Iterable[UserScore]):
     return sorted(user_scores, key=lambda score: score.highest_score, reverse=True)
 
 
+def sort_by_latest_game(user_scores: Iterable[UserScore]):
+    """Sort an array of UserScores, most recent first"""
+    return sorted(user_scores, key=lambda score: score.latest_game, reverse=True)
+
+
 class ScoreRepository:
     def __init__(self, filepath: str, backup_files: bool):
         self.filepath = filepath
@@ -56,8 +70,16 @@ class ScoreRepository:
         self._sort_scores()
 
     @property
+    def recent_gamers_usernames(self):
+        return [uc.username for uc in sort_by_latest_game(self.all_user_scores)]
+
+    @property
+    def all_user_scores(self):
+        return chain(*self._scores.values())
+
+    @property
     def ranked_user_scores(self):
-        return sort_by_score(chain(*self._scores.values()))
+        return sort_by_score(self.all_user_scores)
 
     def _sort_scores(self):
         for cat, user_scores in list(self._scores.items()):

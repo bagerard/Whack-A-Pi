@@ -3,14 +3,14 @@ import traceback
 import sys
 from enum import Enum
 import os
-from itertools import chain
 
 import pygame
 
+from assets import ASSETS_DIR
 from hiscore_menu import init_hiscore_menu
 from screens import game_screen, SIZE, menu_screen, lose_screen, win_screen
 from react import GameEngine
-from scores import ScoreRepository, sort_by_score
+from scores import ScoreRepository
 
 ## Mock GPIO
 from gpiozero import Device
@@ -21,8 +21,8 @@ Device.pin_factory = MockFactory()
 clock = pygame.time.Clock()
 
 FPS = 30
-
 GAME_TIME = 5
+HISCORE_THRESHOLD = 5
 
 SCORE_FILE = "scores.json"
 
@@ -61,7 +61,6 @@ def on_click(game_engine, game_ctx, score_repo: ScoreRepository):
             menu = init_hiscore_menu(on_close_cb=showmainscreen_cb, hiscores=score_repo.ranked_user_scores)
             menu.mainloop(
                 surface=screen,
-                # bgfun=partial(paint_background, screen),
                 disable_loop=False,
                 fps_limit=30,
             )
@@ -106,7 +105,8 @@ def main():
     played_boxing_bell = False
     while True:
         clock.tick(FPS)
-        win_screen(screen)  # DEBUG
+
+        # debugging
         if prev_mode != game_ctx.current_mode:
             print("SWITCH TO MODE", game_ctx.current_mode)
             prev_mode = game_ctx.current_mode
@@ -131,7 +131,7 @@ def main():
             print("game_engine.ready_wait")
 
             if game_engine.ready_wait(min(60, GAME_TIME)):
-                play_music("assets/robots_auto_aim_engaged.wav")
+                play_music(f"{ASSETS_DIR}/robots_auto_aim_engaged.wav")
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
 
@@ -164,13 +164,14 @@ def main():
                     highest_cat_user_score,
                     overall_champion=score_repo.overall_champion,
                 )
-                play_music("airhorn.mp3")
+                # play_music("airhorn.mp3")
+                # while pygame.mixer.music.get_busy():
+                #     time.sleep(0.1)
 
-                while pygame.mixer.music.get_busy():
-                    time.sleep(0.1)
-
-                if game_result.score >= highest_cat_user_score.highest_score:
-                    user_infos = win_screen(screen)
+                if game_result.score >= HISCORE_THRESHOLD:
+                    play_music(f"{ASSETS_DIR}/successful-horn.wav")
+                    # Player Achieved more than the threshold and can register
+                    user_infos = win_screen(screen, recent_usernames=score_repo.recent_gamers_usernames)  # DEBUG
                     firstname = user_infos[0]
 
                     score_repo.update_user_score(
@@ -186,6 +187,7 @@ def main():
                         categories_highest_score=score_repo.get_highest_scores_by_cat,
                     )
                 else:
+                    play_music(f"{ASSETS_DIR}/funny-clown-horn.wav")
                     lose_screen(screen)
                     game_ctx.current_mode = GAME_MODE.POSTGAME
 
@@ -208,7 +210,7 @@ def main():
                         0 < game_result.score >= highest_cat_user_score.highest_score
                     )
                     if beat_a_champion and not played_boxing_bell:
-                        play_music("assets/BoxingBell.wav")
+                        play_music(f"{ASSETS_DIR}/BoxingBell.wav")
                         played_boxing_bell = True
 
         for event in pygame.event.get():
@@ -226,10 +228,6 @@ def main():
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 print(f"Event: MOUSEBUTTONUP")
-                # pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-                # pygame.draw.circle(
-                #     screen, pygame.Color(255, 10, 10), pos, 2, 0
-                # )  # for debugging purposes - adds a small dot where the screen is pressed
                 game_category = on_click(
                     game_engine, game_ctx, score_repo
                 )

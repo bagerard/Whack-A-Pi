@@ -3,3 +3,4 @@ pydantic
 pygame
 gpiozero
 random-username
+pygame_menu

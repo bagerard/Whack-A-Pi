@@ -5,6 +5,7 @@ import eztext
 import sys
 
 # set SIZE of the screen
+from assets import ASSETS_DIR
 from scores import UserScore
 
 SIZE = (1280, 800)
@@ -22,7 +23,7 @@ GREEN = 0, 255, 0
 top = 0
 
 
-CLOCK_FONT_PATH = "assets/digital-7 (mono).ttf"
+CLOCK_FONT_PATH = f"{ASSETS_DIR}/digital-7 (mono).ttf"
 
 clock = pygame.time.Clock()
 FPS = 30
@@ -78,7 +79,7 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
 
         is_champion_category = score_category == ranked_categories[0][0]
         if is_champion_category:
-            crown_img = pygame.image.load("assets/crown.png").convert_alpha()
+            crown_img = pygame.image.load(f"{ASSETS_DIR}/crown.png").convert_alpha()
             screen.blit(
                 crown_img,
                 (
@@ -249,8 +250,8 @@ class QuickPickButton:
         )
 
 
-def win_screen(screen) -> List[str]:
-    """Returns User input from the win screen"""
+def win_screen(screen, recent_usernames: List[str]) -> List[str]:
+    """Display the Win screen where user can enter his username"""
     line_pos = SIZE[1] / 3
     max_username_len = 12   # Fits main screen
     firstname_input = eztext.Input(
@@ -268,18 +269,18 @@ def win_screen(screen) -> List[str]:
 
     submit_btn = _draw_win_screen(screen)
 
-    # QuickPick buttons setup
-    usernames = [f'bagerard-{i}' for i in range(10)]
+    # QuickPick usernames buttons
     quickpick_btns = []
+    x_subd = 8
+    y_subd = 8
     qp_pos = [
-        ((8, 0), (6, 2)),
-        ((8, 1), (6, 2)),
-        ((8, 2), (6, 2)),
-        ((8, 0), (6, 3)),
-        ((8, 1), (6, 3)),
-        ((8, 2), (6, 3)),
+        ((x_subd, xi), (y_subd, yi))
+        for yi in (3, 4, 5)
+        for xi in range(3)
+
     ]
-    for idx, username in enumerate(usernames[:6]):
+
+    for idx, username in enumerate(recent_usernames[:9]):
         qp_font = pygame.font.Font(None, 30)
         qp_btn = qp_font.render(username, 1, YELLOW)
 
@@ -314,9 +315,9 @@ def win_screen(screen) -> List[str]:
                         ib_idx = i
                         break
 
-                # if quickpick_btn:
-                #     quickpick_selected = _box_clicked(quickpick_btn, pos)
-                #     inputboxes[0].value = "bagerard"
+                for quickpick_btn in quickpick_btns:
+                    if _box_clicked(quickpick_btn, pos):
+                        inputboxes[0].value = quickpick_btn.value
 
             if event.type == pygame.KEYDOWN:
 
@@ -338,6 +339,7 @@ def win_screen(screen) -> List[str]:
                         print("Missing required input value")
 
         submit_btn = _draw_win_screen(screen)
+
         inputboxes[ib_idx].update(events)
         for ib in inputboxes:
             ib.draw(screen)
