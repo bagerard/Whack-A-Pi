@@ -98,9 +98,7 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         screen.blit(lab_score, (align_h(lab_score, 3, idx), line_pos))
 
         line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(
-            f"{user_score.username}", 1, ORANGE
-        )
+        lab_name1 = fnt_title.render(f"{user_score.username}", 1, ORANGE)
         screen.blit(lab_name1, (align_h(lab_name1, 3, idx), line_pos))
 
         # old Lastname
@@ -114,18 +112,13 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         1,
         YELLOW,
     )
-    x = SIZE[0] / 2 - hiscores_btn.get_width()/2
+    x = SIZE[0] / 2 - hiscores_btn.get_width() / 2
     y = SIZE[1] - 20 - hiscores_btn.get_height()
     screen.blit(hiscores_btn, (x, y))
     _ = pygame.draw.rect(
         screen,
         YELLOW,
-        (
-            10,
-            y - 15,
-            SIZE[0] - 21,
-            hiscores_btn.get_height() + 30
-        ),
+        (10, y - 15, SIZE[0] - 21, hiscores_btn.get_height() + 30),
         1,
     )
 
@@ -253,7 +246,7 @@ class QuickPickButton:
 def win_screen(screen, recent_usernames: List[str]) -> List[str]:
     """Display the Win screen where user can enter his username"""
     line_pos = SIZE[1] / 3
-    max_username_len = 12   # Fits main screen
+    max_username_len = 12  # Fits main screen
     firstname_input = eztext.Input(
         maxlength=max_username_len,
         color=WHITE,
@@ -273,12 +266,7 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
     quickpick_btns = []
     x_subd = 8
     y_subd = 8
-    qp_pos = [
-        ((x_subd, xi), (y_subd, yi))
-        for yi in (3, 4, 5)
-        for xi in range(3)
-
-    ]
+    qp_pos = [((x_subd, xi), (y_subd, yi)) for yi in (3, 4, 5) for xi in range(3)]
 
     for idx, username in enumerate(recent_usernames[:9]):
         qp_font = pygame.font.Font(None, 30)
@@ -290,7 +278,7 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 username,
                 qp_btn,
                 x=align_h(qp_btn, *h_cols) + 20,
-                y=align_v(qp_btn, *v_cols)
+                y=align_v(qp_btn, *v_cols),
             )
         )
 
@@ -309,7 +297,7 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 for i, ib in enumerate(inputboxes):
                     ib_selected = _box_clicked(ib, pos)
                     if ib_selected:
-                        print(f'Input box {i} selected - change focus')
+                        print(f"Input box {i} selected - change focus")
                         inputboxes[ib_idx].set_focus(False)
                         ib.set_focus(True)
                         ib_idx = i

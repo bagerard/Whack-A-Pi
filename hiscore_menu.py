@@ -28,16 +28,14 @@ def init_hiscore_menu(on_close_cb, hiscores: List[UserScore]) -> "pygame_menu.Me
     # Hack but Frame._update_indices turned out to bottleneck for large table (> 50-100 entries)
     # and by mockeypatching it in a dumb way, it seems to have no effects
     with unittest.mock.patch(
-        'pygame_menu.widgets.widget.frame.Frame._update_indices',
-        new=lambda x: 'Something really cheap.'
+        "pygame_menu.widgets.widget.frame.Frame._update_indices",
+        new=lambda x: "Something really cheap.",
     ):
         for idx, user_score in enumerate(hiscores):
             rank = idx + 1
             columns = [rank] + list(user_score.pretty_dict().values())
             table_contrib.add_row(
-                columns,
-                cell_font=bold_font if idx == 0 else None,
-                cell_font_size=15
+                columns, cell_font=bold_font if idx == 0 else None, cell_font_size=15
             )
     table_contrib.update_cell_style(
         1, [2, -1], font=pygame_menu.font.FONT_OPEN_SANS_ITALIC

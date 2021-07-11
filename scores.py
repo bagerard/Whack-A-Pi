@@ -41,13 +41,9 @@ class UserScore:
 
     def register_new_game_score(self, score, mean_hit_time):
         self.n_games += 1
-        self.highest_score = max(
-            self.highest_score, score
-        )
+        self.highest_score = max(self.highest_score, score)
         self.latest_game = str(dt.datetime.now())
-        best_mean_hit_time = min(
-            self.best_mean_hit_time, mean_hit_time
-        )
+        best_mean_hit_time = min(self.best_mean_hit_time, mean_hit_time)
         self.best_mean_hit_time = round(best_mean_hit_time, 2)
 
 
@@ -104,7 +100,9 @@ class ScoreRepository:
             (uc for uc in self._scores[cat] if uc.username == username), None
         )
         if existing_user_score:
-            existing_user_score.register_new_game_score(score=score, mean_hit_time=mean_hit_time)
+            existing_user_score.register_new_game_score(
+                score=score, mean_hit_time=mean_hit_time
+            )
         else:
             new_score = UserScore(
                 username=username, highest_score=score, best_mean_hit_time=mean_hit_time

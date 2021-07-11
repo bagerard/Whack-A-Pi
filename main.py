@@ -15,6 +15,7 @@ from scores import ScoreRepository
 ## Mock GPIO
 from gpiozero import Device
 from gpiozero.pins.mock import MockFactory
+
 Device.pin_factory = MockFactory()
 ##
 
@@ -58,7 +59,9 @@ def on_click(game_engine, game_ctx, score_repo: ScoreRepository):
             showmainscreen_cb = lambda: show_mainscreen(
                 game_engine, categories_highest_score
             )
-            menu = init_hiscore_menu(on_close_cb=showmainscreen_cb, hiscores=score_repo.ranked_user_scores)
+            menu = init_hiscore_menu(
+                on_close_cb=showmainscreen_cb, hiscores=score_repo.ranked_user_scores
+            )
             menu.mainloop(
                 surface=screen,
                 disable_loop=False,
@@ -171,7 +174,9 @@ def main():
                 if game_result.score >= HISCORE_THRESHOLD:
                     play_music(f"{ASSETS_DIR}/successful-horn.wav")
                     # Player Achieved more than the threshold and can register
-                    user_infos = win_screen(screen, recent_usernames=score_repo.recent_gamers_usernames)  # DEBUG
+                    user_infos = win_screen(
+                        screen, recent_usernames=score_repo.recent_gamers_usernames
+                    )  # DEBUG
                     firstname = user_infos[0]
 
                     score_repo.update_user_score(
@@ -228,9 +233,7 @@ def main():
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 print(f"Event: MOUSEBUTTONUP")
-                game_category = on_click(
-                    game_engine, game_ctx, score_repo
-                )
+                game_category = on_click(game_engine, game_ctx, score_repo)
 
 
 try:
