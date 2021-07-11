@@ -3,13 +3,14 @@ import traceback
 import sys
 from enum import Enum
 import os
+from itertools import chain
 
 import pygame
 
 from hiscore_menu import init_hiscore_menu
 from screens import game_screen, SIZE, menu_screen, lose_screen, win_screen
 from react import GameEngine
-from scores import ScoreRepository
+from scores import ScoreRepository, sort_by_score
 
 ## Mock GPIO
 from gpiozero import Device
@@ -38,34 +39,34 @@ class GameContext:
         self.current_mode = current_mode
 
 
-def on_click(game_engine, game_ctx, categories_highest_score):
+def on_click(game_engine, game_ctx, score_repo: ScoreRepository):
     print("on_click")
     click_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
 
+    categories_highest_score = score_repo.get_highest_scores_by_cat
+
     game_category = -1
     if game_ctx.current_mode == GAME_MODE.MENU:
-        button_width = SIZE[0] / 3
-        if click_pos[1] > SIZE[1] / 3:
-            game_category = int(click_pos[0] / button_width)
-            if game_category != 0:
-                game_ctx.current_mode = GAME_MODE.INITGAME
-            elif game_category == 0:
-                # Execute main from principal menu if is enabled
+        cat_button_width = SIZE[0] / 3
+        mouse_y_in_cat_area = SIZE[1] / 3 < click_pos[1] < SIZE[1] - 80
+        mouse_y_in_hiscores_area = click_pos[1] >= SIZE[1] - 80
+        if mouse_y_in_cat_area:
+            game_category = int(click_pos[0] / cat_button_width)
+            game_ctx.current_mode = GAME_MODE.INITGAME
+            pygame.display.flip()
+        elif mouse_y_in_hiscores_area:
+            showmainscreen_cb = lambda: show_mainscreen(
+                game_engine, categories_highest_score
+            )
+            menu = init_hiscore_menu(on_close_cb=showmainscreen_cb, hiscores=score_repo.ranked_user_scores)
+            menu.mainloop(
+                surface=screen,
+                # bgfun=partial(paint_background, screen),
+                disable_loop=False,
+                fps_limit=30,
+            )
+            pygame.display.flip()
 
-                showmainscreen_cb = lambda: show_mainscreen(
-                    game_engine, categories_highest_score
-                )
-
-                menu = init_hiscore_menu(on_close_cb=showmainscreen_cb)
-                menu.mainloop(
-                    surface=screen,
-                    # bgfun=partial(paint_background, screen),
-                    disable_loop=False,
-                    fps_limit=30,
-                )
-                # Update surface
-                pygame.display.flip()
-                print("HHAAAAAL")
     elif game_ctx.current_mode == GAME_MODE.POSTGAME:
         game_ctx.current_mode = GAME_MODE.MENU
         show_mainscreen(game_engine, categories_highest_score)
@@ -105,7 +106,7 @@ def main():
     played_boxing_bell = False
     while True:
         clock.tick(FPS)
-        # time.sleep(0.05)
+        win_screen(screen)  # DEBUG
         if prev_mode != game_ctx.current_mode:
             print("SWITCH TO MODE", game_ctx.current_mode)
             prev_mode = game_ctx.current_mode
@@ -204,7 +205,7 @@ def main():
                     last_score = game_result.score
 
                     beat_a_champion = (
-                        game_result.score >= highest_cat_user_score.highest_score
+                        0 < game_result.score >= highest_cat_user_score.highest_score
                     )
                     if beat_a_champion and not played_boxing_bell:
                         play_music("assets/BoxingBell.wav")
@@ -230,7 +231,7 @@ def main():
                 #     screen, pygame.Color(255, 10, 10), pos, 2, 0
                 # )  # for debugging purposes - adds a small dot where the screen is pressed
                 game_category = on_click(
-                    game_engine, game_ctx, score_repo.get_highest_scores_by_cat
+                    game_engine, game_ctx, score_repo
                 )
 
 

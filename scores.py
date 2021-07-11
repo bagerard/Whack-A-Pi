@@ -5,7 +5,8 @@ import json
 import datetime as dt
 
 from dataclasses import dataclass, asdict, field
-from typing import List, Dict
+from itertools import chain
+from typing import List, Dict, Iterable
 
 from random_username.generate import generate_username
 
@@ -14,7 +15,7 @@ SCORE_CATEGORIES = ["Product", "F&A", "Ops"]
 DEFAULT_RAW_HIGH_SCORES = {
     cat: [
         {
-            "username": generate_username(1)[0],
+            "username": generate_username(1)[0][:12],
         }
     ]
     for cat in SCORE_CATEGORIES
@@ -35,12 +36,13 @@ class UserScore:
             self.highest_score, score
         )
         self.latest_game = str(dt.datetime.now())[:10]
-        self.best_mean_hit_time = min(
+        best_mean_hit_time = min(
             self.best_mean_hit_time, mean_hit_time
         )
+        self.best_mean_hit_time = round(best_mean_hit_time, 2)
 
 
-def sort_by_score(user_scores: List[UserScore]):
+def sort_by_score(user_scores: Iterable[UserScore]):
     """Sort an array of UserScores, highest first"""
     return sorted(user_scores, key=lambda score: score.highest_score, reverse=True)
 
@@ -50,8 +52,12 @@ class ScoreRepository:
         self.filepath = filepath
         self.backup_files = backup_files
         raw_scores = load_scores(filepath) or DEFAULT_RAW_HIGH_SCORES
-        self._scores: Dict[str, UserScore] = self._from_raw_scores(raw_scores)
+        self._scores: Dict[str, List[UserScore]] = self._from_raw_scores(raw_scores)
         self._sort_scores()
+
+    @property
+    def ranked_user_scores(self):
+        return sort_by_score(chain(*self._scores.values()))
 
     def _sort_scores(self):
         for cat, user_scores in list(self._scores.items()):

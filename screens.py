@@ -27,7 +27,12 @@ CLOCK_FONT_PATH = "assets/digital-7 (mono).ttf"
 clock = pygame.time.Clock()
 FPS = 30
 
+
 def align_h(label, cols=1, col=0, width=SIZE[0]):
+    """
+    Given a label, cut the width into {cols} and return coordinates of the button
+    at place {col}
+    """
     col_width = width / cols
     return ((col_width - label.get_width()) / 2) + col_width * col
 
@@ -67,11 +72,12 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
             (max_width * idx) + 10,
             top,
             max_width - 20,
-            max_height - 10,
+            max_height - 80,
         )
         pygame.draw.rect(screen, WHITE, rect, 1)
 
-        if score_category == ranked_categories[0][0]:
+        is_champion_category = score_category == ranked_categories[0][0]
+        if is_champion_category:
             crown_img = pygame.image.load("assets/crown.png").convert_alpha()
             screen.blit(
                 crown_img,
@@ -100,6 +106,27 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         # line_pos += lab_name1.get_height() + 15
         # lab_name2 = fnt_title.render(user_score.somethingelse, 1, ORANGE)
         # screen.blit(lab_name2, (align_h(lab_name2, 3, idx), line_pos))
+
+    hiscores_btn_font = pygame.font.Font(None, 60)
+    hiscores_btn = hiscores_btn_font.render(
+        "HiScores",
+        1,
+        YELLOW,
+    )
+    x = SIZE[0] / 2 - hiscores_btn.get_width()/2
+    y = SIZE[1] - 20 - hiscores_btn.get_height()
+    screen.blit(hiscores_btn, (x, y))
+    _ = pygame.draw.rect(
+        screen,
+        YELLOW,
+        (
+            10,
+            y - 15,
+            SIZE[0] - 21,
+            hiscores_btn.get_height() + 30
+        ),
+        1,
+    )
 
     pygame.display.flip()
 
@@ -192,12 +219,42 @@ def _box_clicked(item, pos: Tuple[int, int]):
     return item.top <= pos[1] <= item.bottom and item.left <= pos[0] <= item.right
 
 
+class QuickPickButton:
+    def __init__(self, value, rendered_txt, x, y):
+        self.rendered_btn_txt = rendered_txt
+        self.value = value
+        self.btn_label_x = x
+        self.btn_label_y = y
+
+        self.left = self.btn_label_x - 15
+        self.top = self.btn_label_y - 15
+        self.width = self.rendered_btn_txt.get_width() + 30
+        self.height = self.rendered_btn_txt.get_height() + 30
+
+    @property
+    def right(self):
+        return self.left + self.width
+
+    @property
+    def bottom(self):
+        return self.top + self.height
+
+    def draw(self, screen):
+        screen.blit(self.rendered_btn_txt, (self.btn_label_x, self.btn_label_y))
+        pygame.draw.rect(
+            screen,
+            YELLOW,
+            (self.left, self.top, self.width, self.height),
+            1,
+        )
+
+
 def win_screen(screen) -> List[str]:
     """Returns User input from the win screen"""
     line_pos = SIZE[1] / 3
-
+    max_username_len = 12   # Fits main screen
     firstname_input = eztext.Input(
-        maxlength=30,
+        maxlength=max_username_len,
         color=WHITE,
         focuscolor=YELLOW,
         prompt="Username: ",
@@ -210,6 +267,7 @@ def win_screen(screen) -> List[str]:
     ib_idx = 0  # selected input box index
 
     submit_btn = _draw_win_screen(screen)
+    quickpick_btn = None
 
     while True:
         clock.tick(FPS)
@@ -231,6 +289,10 @@ def win_screen(screen) -> List[str]:
                         ib.set_focus(True)
                         ib_idx = i
                         break
+
+                if quickpick_btn:
+                    quickpick_selected = _box_clicked(quickpick_btn, pos)
+                    inputboxes[0].value = "bagerard"
 
             if event.type == pygame.KEYDOWN:
 
@@ -255,6 +317,18 @@ def win_screen(screen) -> List[str]:
         inputboxes[ib_idx].update(events)
         for ib in inputboxes:
             ib.draw(screen)
+
+        # QuickPick test
+        fnt_head = pygame.font.Font(None, 40)
+        lab_btn = fnt_head.render(
+            "bagerard",
+            1,
+            YELLOW,
+        )
+        quickpick_btn = QuickPickButton("bagerard", lab_btn, x=align_h(lab_btn, 6, 0) + 40, y=align_v(lab_btn, 6, 3))
+        quickpick_btn.draw(screen)
+        ####
+
         pygame.display.flip()
 
 
