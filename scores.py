@@ -66,12 +66,16 @@ class ScoreRepository:
         self._sort_scores()
 
     @property
-    def recent_gamers_usernames(self):
-        return [uc.username for uc in sort_by_latest_game(self.all_user_scores)]
-
-    @property
     def all_user_scores(self):
         return chain(*self._scores.values())
+
+    @property
+    def recent_user_scores(self):
+        return sort_by_latest_game(self.all_user_scores)
+
+    @property
+    def recent_gamers_usernames(self):
+        return [uc.username for uc in self.recent_user_scores]
 
     @property
     def ranked_user_scores(self):

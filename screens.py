@@ -106,19 +106,35 @@ def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
         # lab_name2 = fnt_title.render(user_score.somethingelse, 1, ORANGE)
         # screen.blit(lab_name2, (align_h(lab_name2, 3, idx), line_pos))
 
+    # HiScores
     hiscores_btn_font = pygame.font.Font(None, 60)
     hiscores_btn = hiscores_btn_font.render(
         "HiScores",
         1,
         YELLOW,
     )
-    x = SIZE[0] / 2 - hiscores_btn.get_width() / 2
+    x = SIZE[0] / 4 - hiscores_btn.get_width() / 2
     y = SIZE[1] - 20 - hiscores_btn.get_height()
     screen.blit(hiscores_btn, (x, y))
     _ = pygame.draw.rect(
         screen,
         YELLOW,
-        (10, y - 15, SIZE[0] - 21, hiscores_btn.get_height() + 30),
+        (10, y - 15, SIZE[0] / 2 - 21, hiscores_btn.get_height() + 30),
+        1,
+    )
+    # Recent players
+    hiscores_btn_font = pygame.font.Font(None, 60)
+    hiscores_btn = hiscores_btn_font.render(
+        "Recent Players",
+        1,
+        YELLOW,
+    )
+    x = SIZE[0] / 2 + SIZE[0] / 4 - hiscores_btn.get_width() / 2
+    screen.blit(hiscores_btn, (x, y))
+    _ = pygame.draw.rect(
+        screen,
+        YELLOW,
+        (SIZE[0] / 2 + 10, y - 15, SIZE[0] / 2 - 21, hiscores_btn.get_height() + 30),
         1,
     )
 

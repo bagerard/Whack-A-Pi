@@ -50,17 +50,25 @@ def on_click(game_engine, game_ctx, score_repo: ScoreRepository):
     if game_ctx.current_mode == GAME_MODE.MENU:
         cat_button_width = SIZE[0] / 3
         mouse_y_in_cat_area = SIZE[1] / 3 < click_pos[1] < SIZE[1] - 80
-        mouse_y_in_hiscores_area = click_pos[1] >= SIZE[1] - 80
+        mouse_y_in_scores_area = click_pos[1] >= SIZE[1] - 80
         if mouse_y_in_cat_area:
             game_category = int(click_pos[0] / cat_button_width)
             game_ctx.current_mode = GAME_MODE.INITGAME
             pygame.display.flip()
-        elif mouse_y_in_hiscores_area:
+        elif mouse_y_in_scores_area:
+            rank_by_hiscore = (
+                click_pos[0] < SIZE[0] / 2
+            )  # user clicked on 'hiscore' (as opposed to 'recent')
             showmainscreen_cb = lambda: show_mainscreen(
                 game_engine, categories_highest_score
             )
+            sorted_scores = (
+                score_repo.ranked_user_scores
+                if rank_by_hiscore
+                else score_repo.recent_user_scores
+            )
             menu = init_hiscore_menu(
-                on_close_cb=showmainscreen_cb, hiscores=score_repo.ranked_user_scores
+                on_close_cb=showmainscreen_cb, hiscores=sorted_scores
             )
             menu.mainloop(
                 surface=screen,
@@ -176,7 +184,7 @@ def main():
                     # Player Achieved more than the threshold and can register
                     user_infos = win_screen(
                         screen, recent_usernames=score_repo.recent_gamers_usernames
-                    )  # DEBUG
+                    )
                     firstname = user_infos[0]
 
                     score_repo.update_user_score(

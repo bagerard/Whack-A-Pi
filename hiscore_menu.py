@@ -25,17 +25,21 @@ def init_hiscore_menu(on_close_cb, hiscores: List[UserScore]) -> "pygame_menu.Me
     column_names = ["rank"] + list(hiscores[0].pretty_dict().keys())
     table_contrib.add_row(column_names, cell_font=bold_font, cell_font_size=15)
 
+    # Assign a rank to each score
+    ranked_score = sorted({us.highest_score for us in hiscores}, reverse=1)
+    ranked_score_map = {score: rank for rank, score in enumerate(ranked_score, start=1)}
+
     # Hack but Frame._update_indices turned out to bottleneck for large table (> 50-100 entries)
     # and by mockeypatching it in a dumb way, it seems to have no effects
     with unittest.mock.patch(
         "pygame_menu.widgets.widget.frame.Frame._update_indices",
         new=lambda x: "Something really cheap.",
     ):
-        for idx, user_score in enumerate(hiscores):
-            rank = idx + 1
+        for user_score in hiscores:
+            rank = ranked_score_map[user_score.highest_score]
             columns = [rank] + list(user_score.pretty_dict().values())
             table_contrib.add_row(
-                columns, cell_font=bold_font if idx == 0 else None, cell_font_size=15
+                columns, cell_font=bold_font if rank == 1 else None, cell_font_size=15
             )
     table_contrib.update_cell_style(
         1, [2, -1], font=pygame_menu.font.FONT_OPEN_SANS_ITALIC
