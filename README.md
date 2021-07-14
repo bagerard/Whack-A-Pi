@@ -20,3 +20,6 @@ Simply run:
 And if you don't have a raspberry Pi plugged in, you can mock the GPIO device with:
 
     GPIOZERO_PIN_FACTORY=mock python main.py
+    
+## Credits
+The LED Clock (or 7 segment style) font is called Digital 7 and is freeware available from styleseven.com
