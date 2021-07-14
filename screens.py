@@ -9,7 +9,6 @@ from assets import ASSETS_DIR
 from scores import UserScore
 
 SIZE = (1280, 800)
-width, height = SIZE
 
 # define colours
 BLUE = 26, 0, 255
