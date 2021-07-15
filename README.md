@@ -7,6 +7,9 @@ Main features that were added:
 - Store additional metadata per game (latest game timestamp, mean hit time, number of games)
 - Add a HiScore screen
 
+The game is currently set up to launch a thread that will trigger the buttons in a loop, this allows for testing
+while I'm waiting for the delivery of the arcade buttons
+
 ## Install
 Make sure you have pyenv installed, then run:
 
