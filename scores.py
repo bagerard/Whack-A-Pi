@@ -3,6 +3,7 @@ import time
 import json
 
 import datetime as dt
+from collections import defaultdict
 
 from dataclasses import dataclass, asdict, field
 from itertools import chain
@@ -43,8 +44,13 @@ class UserScore:
         self.n_games += 1
         self.highest_score = max(self.highest_score, score)
         self.latest_game = str(dt.datetime.now())
-        best_mean_hit_time = min(self.best_mean_hit_time, mean_hit_time)
-        self.best_mean_hit_time = round(best_mean_hit_time, 2)
+        self.best_mean_hit_time = min(self.best_mean_hit_time, mean_hit_time)
+
+    def merge(self, other_user_score: 'UserScore'):
+        self.n_games += other_user_score.n_games
+        self.highest_score = max(self.highest_score, other_user_score.highest_score)
+        self.latest_game = max(self.latest_game, other_user_score.latest_game)
+        self.best_mean_hit_time = min(self.best_mean_hit_time, other_user_score.best_mean_hit_time)
 
 
 def sort_by_score(user_scores: Iterable[UserScore]):
@@ -85,7 +91,32 @@ class ScoreRepository:
         for cat, user_scores in list(self._scores.items()):
             self._scores[cat] = sort_by_score(user_scores)
 
+    def clean_scores(self):
+        username_2_scores = defaultdict(dict)    # {username: {cat: user_score}}
+        for cat, user_scores in self._scores.items():
+            for user_score in user_scores:
+                username_2_scores[user_score.username][cat] = user_score
+
+        print("username_2_scores", username_2_scores)
+        for username, cat_user_scores in username_2_scores.items():
+            if len(cat_user_scores) > 1:
+                print(f'Found duplicate record for {username}')
+
+                details = [(cat, us.latest_game, us) for cat, us in cat_user_scores.items()]
+                recent_details = sorted(details, key=lambda i: i[1], reverse=True)
+                most_recent_user_score_cat = recent_details[0][0]
+                most_recent_user_score = recent_details[0][2]
+                print(f"Found most recent in {most_recent_user_score_cat}")
+
+                for other_cat, _, dup_user_score in recent_details[1:]:
+                    # Modify most recent record
+                    most_recent_user_score.merge(dup_user_score)
+                    # Remove older duplicates
+                    print(f"cleaning {other_cat}")
+                    self._scores[other_cat] = [us for us in self._scores[other_cat] if us is not dup_user_score]
+
     def save_to_file(self):
+        self.clean_scores()
         raw_scores = self._to_raw_scores(self._scores)
         save_scores(raw_scores, self.filepath, backup_files=self.backup_files)
 
