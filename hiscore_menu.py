@@ -26,7 +26,7 @@ def init_hiscore_menu(on_close_cb, hiscores: List[UserScore]) -> "pygame_menu.Me
     table_contrib.add_row(column_names, cell_font=bold_font, cell_font_size=15)
 
     # Assign a rank to each score
-    ranked_score = sorted({us.highest_score for us in hiscores}, reverse=1)
+    ranked_score = sorted({us.highest_score for us in hiscores}, reverse=1)  # type: ignore
     ranked_score_map = {score: rank for rank, score in enumerate(ranked_score, start=1)}
 
     # Hack but Frame._update_indices turned out to bottleneck for large table (> 50-100 entries)
