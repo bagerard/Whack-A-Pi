@@ -36,7 +36,7 @@ class UserScore:
             "username": self.username,
             "highest score": self.highest_score,
             "n games": self.n_games,
-            "latest game": self.latest_game[:10],
+            "latest game": str(self.latest_game)[:10],
             "best mean hit time": round(self.best_mean_hit_time, 2),
         }
 
