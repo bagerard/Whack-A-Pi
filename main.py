@@ -8,7 +8,7 @@ import pygame
 
 from assets import ASSETS_DIR
 from hiscore_menu import init_hiscore_menu
-from screens import game_screen, SIZE, menu_screen, lose_screen, win_screen
+from screens import game_screen, SIZE, lose_screen, win_screen, MainMenuGUI
 from react import GameEngine
 from scores import ScoreRepository
 
@@ -29,7 +29,7 @@ SCORE_FILE = "scores.json"
 
 
 class GAME_MODE(Enum):
-    MENU = 1
+    MAIN_MENU = 1
     INITGAME = 2
     GAME = 3
     POSTGAME = 4
@@ -40,55 +40,58 @@ class GameContext:
         self.current_mode = current_mode
 
 
-def on_click(game_engine, game_ctx, score_repo: ScoreRepository):
-    print("on_click")
+def on_click(
+    main_menu: MainMenuGUI, game_engine, game_ctx, score_repo: ScoreRepository
+):
     click_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-
+    print("on_click", click_pos)
     categories_highest_score = score_repo.get_highest_scores_by_cat
 
-    game_category = -1
-    if game_ctx.current_mode == GAME_MODE.MENU:
-        cat_button_width = SIZE[0] / 3
-        mouse_y_in_cat_area = SIZE[1] / 3 < click_pos[1] < SIZE[1] - 80
-        mouse_y_in_scores_area = click_pos[1] >= SIZE[1] - 80
-        if mouse_y_in_cat_area:
-            game_category = int(click_pos[0] / cat_button_width)
+    game_category = None
+    if game_ctx.current_mode == GAME_MODE.MAIN_MENU:
+        game_category = main_menu.selected_category_box(click_pos)
+        if game_category:
             game_ctx.current_mode = GAME_MODE.INITGAME
             pygame.display.flip()
-        elif mouse_y_in_scores_area:
-            rank_by_hiscore = (
-                click_pos[0] < SIZE[0] / 2
-            )  # user clicked on 'hiscore' (as opposed to 'recent')
-            showmainscreen_cb = lambda: show_mainscreen(
-                game_engine, categories_highest_score
-            )
-            sorted_scores = (
-                score_repo.ranked_user_scores
-                if rank_by_hiscore
-                else score_repo.recent_user_scores
-            )
-            menu = init_hiscore_menu(
-                on_close_cb=showmainscreen_cb, hiscores=sorted_scores
-            )
-            menu.mainloop(
-                surface=screen,
-                disable_loop=False,
-                fps_limit=30,
-            )
-            pygame.display.flip()
+        else:
+            if main_menu.clicked_hiscores(click_pos) or main_menu.clicked_recent_scores(
+                click_pos
+            ):
+                showmainscreen_cb = lambda: show_mainscreen(
+                    game_engine, categories_highest_score
+                )
+
+                rank_by_hiscore = main_menu.clicked_hiscores(click_pos)
+
+                sorted_scores = (
+                    score_repo.ranked_user_scores
+                    if rank_by_hiscore
+                    else score_repo.recent_user_scores
+                )
+                menu = init_hiscore_menu(
+                    on_close_cb=showmainscreen_cb, hiscores=sorted_scores
+                )
+                menu.mainloop(
+                    surface=screen,
+                    disable_loop=False,
+                    fps_limit=30,
+                )
+                pygame.display.flip()
 
     elif game_ctx.current_mode == GAME_MODE.POSTGAME:
-        game_ctx.current_mode = GAME_MODE.MENU
+        game_ctx.current_mode = GAME_MODE.MAIN_MENU
         show_mainscreen(game_engine, categories_highest_score)
 
-    return list(categories_highest_score.keys())[game_category]
+    return game_category
 
 
-def show_mainscreen(game_engine, categories_highest_score) -> None:
+def show_mainscreen(game_engine, categories_highest_score) -> MainMenuGUI:
     print("show_mainscreen")
     game_engine.start_idle()
-    menu_screen(screen, categories_highest_score)
+    main_menu = MainMenuGUI(categories_highest_score)
+    main_menu.draw(screen)
     print("out of show_mainscreen")
+    return main_menu
 
 
 def play_music(mp3_path: str) -> None:
@@ -101,11 +104,11 @@ def play_music(mp3_path: str) -> None:
 
 
 def main():
-    game_ctx = GameContext(current_mode=GAME_MODE.MENU)
+    game_ctx = GameContext(current_mode=GAME_MODE.MAIN_MENU)
     score_repo = ScoreRepository(filepath=SCORE_FILE, backup_files=False)
 
     game_engine = GameEngine(game_time=GAME_TIME)
-    show_mainscreen(
+    main_menu = show_mainscreen(
         game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat
     )
 
@@ -152,8 +155,8 @@ def main():
                 game_ctx.current_mode = GAME_MODE.GAME
                 game_engine.start_game()
             else:
-                game_ctx.current_mode = GAME_MODE.MENU
-                show_mainscreen(
+                game_ctx.current_mode = GAME_MODE.MAIN_MENU
+                main_menu = show_mainscreen(
                     game_engine,
                     categories_highest_score=score_repo.get_highest_scores_by_cat,
                 )
@@ -194,7 +197,7 @@ def main():
                         mean_hit_time=game_result.mean_hit_time,
                     )
 
-                    game_ctx.current_mode = GAME_MODE.MENU
+                    game_ctx.current_mode = GAME_MODE.MAIN_MENU
                     show_mainscreen(
                         game_engine,
                         categories_highest_score=score_repo.get_highest_scores_by_cat,
@@ -241,7 +244,7 @@ def main():
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
                 print(f"Event: MOUSEBUTTONUP")
-                game_category = on_click(game_engine, game_ctx, score_repo)
+                game_category = on_click(main_menu, game_engine, game_ctx, score_repo)
 
 
 try:

@@ -101,7 +101,7 @@ class GameEngine:
                     time.sleep(0.5)
 
         print("start start_loop_btn_thread")
-        # Thread(target=_loop_btn, args=(self.buttons,)).start()
+        Thread(target=_loop_btn, args=(self.buttons,)).start()
 
     @property
     def n_leds(self):

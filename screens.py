@@ -1,4 +1,5 @@
-from typing import List, Dict, Tuple
+from dataclasses import dataclass
+from typing import List, Dict, Tuple, Any
 
 import pygame
 import eztext
@@ -8,7 +9,7 @@ import sys
 from assets import ASSETS_DIR
 from scores import UserScore
 
-SIZE = (1280, 800)
+SIZE = (1280, 720)
 
 # define colours
 BLUE = 26, 0, 255
@@ -28,6 +29,12 @@ clock = pygame.time.Clock()
 FPS = 30
 
 
+def rect_is_clicked(rect, click_pos):
+    click_x, click_y = click_pos
+    left, top, width, height = rect
+    return left <= click_x <= left + width and top <= click_y <= top + height
+
+
 def align_h(label, cols=1, col=0, width=SIZE[0]):
     """
     Given a label, cut the width into {cols} and return coordinates of the button
@@ -42,102 +49,165 @@ def align_v(label, rows=1, row=0, height=SIZE[1]):
     return ((row_height - label.get_height()) / 2) + row_height * row
 
 
-def menu_screen(screen, categories_highest_score: Dict[str, UserScore]):
-    global top
+@dataclass
+class MainMenuCatBox:
+    rect: Tuple[float, float, float, float]
+    title: str
+    rendered_title: Any
+    rendered_title_coord: Tuple[int, int]
+    rendered_hiscore: Any
+    rendered_hiscore_coord: Tuple[int, int]
+    rendered_username: Any
+    rendered_username_coord: Tuple[int, int]
 
-    line_pos = 15
-    screen.fill(BLACK)  # change the colours if needed
-    fnt_head = pygame.font.Font(None, 288)
-    fnt_title = pygame.font.Font(None, 84)
-    lab_head = fnt_head.render("Whack-A-Pi", 1, YELLOW)
-    screen.blit(lab_head, (align_h(lab_head), line_pos))
-    line_pos += lab_head.get_height() + 60
 
-    fnt_score = pygame.font.Font(CLOCK_FONT_PATH, 200)
+class MainMenuGUI:
+    def __init__(self, categories_highest_score: Dict[str, UserScore]):
+        self.init_line_pos = 10
 
-    top = line_pos
-    max_width = SIZE[0] / 3
-    max_height = SIZE[1] - top
+        # Title "Whack-A-Pi"
+        fnt_head = pygame.font.Font(None, 175)
+        self.lab_head = fnt_head.render("Whack-A-Pi", 1, YELLOW)
 
-    ranked_categories = [
-        (cat, user_score) for cat, user_score in categories_highest_score.items()
-    ]
-    ranked_categories.sort(key=lambda d: d[1].highest_score, reverse=True)
+        # Category Box
+        fnt_title = pygame.font.Font(None, 84)
+        fnt_score = pygame.font.Font(CLOCK_FONT_PATH, 200)
 
-    for idx, (score_category, user_score) in enumerate(
-        categories_highest_score.items()
-    ):
+        offset_title_rects = 20
+        line_pos = self.init_line_pos + self.lab_head.get_height() + offset_title_rects
 
-        rect = left, top, width, height = (
-            (max_width * idx) + 10,
-            top,
-            max_width - 20,
-            max_height - 80,
-        )
-        pygame.draw.rect(screen, WHITE, rect, 1)
+        top = line_pos
+        max_width = SIZE[0] / 3
+        max_height = SIZE[1] - top
 
-        is_champion_category = score_category == ranked_categories[0][0]
-        if is_champion_category:
-            crown_img = pygame.image.load(f"{ASSETS_DIR}/crown.png").convert_alpha()
-            screen.blit(
-                crown_img,
-                (
-                    left + (width / 2) - crown_img.get_width() / 2,
-                    top - (crown_img.get_height() / 2) - 4,
-                ),
+        ranked_categories = [
+            (cat, user_score) for cat, user_score in categories_highest_score.items()
+        ]
+        ranked_categories.sort(key=lambda d: d[1].highest_score, reverse=True)
+
+        self.cat_boxes: List[MainMenuCatBox] = []
+        self.crown_img_coord: Tuple[int, int]
+
+        for idx, (score_category, user_score) in enumerate(
+            categories_highest_score.items()
+        ):
+            left, top, width, height = (
+                (max_width * idx) + 10,
+                top,
+                max_width - 20,
+                max_height - 80,
             )
 
-        line_pos = top  # reset the vertical cursor
-        line_pos += 45
-        lab_title = fnt_title.render(score_category, 1, WHITE)
-        screen.blit(lab_title, (align_h(lab_title, 3, idx), line_pos))
+            is_champion_category = score_category == ranked_categories[0][0]
+            if is_champion_category:
+                self.crown_img = pygame.image.load(
+                    f"{ASSETS_DIR}/crown.png"
+                ).convert_alpha()
+                self.crown_img_coord = (
+                    left + (width / 2) - self.crown_img.get_width() / 2,
+                    top - (self.crown_img.get_height() / 2) - 4,
+                )
 
-        line_pos += lab_title.get_height() + 30
-        lab_score = fnt_score.render(f"{user_score.highest_score:0>3d}", 1, BLUE)
-        screen.blit(lab_score, (align_h(lab_score, 3, idx), line_pos))
+            line_pos = top  # reset the vertical cursor
+            line_pos += 45
+            lab_title = fnt_title.render(score_category, 1, WHITE)
+            lab_title_coord = (align_h(lab_title, 3, idx), line_pos)
 
-        line_pos += lab_score.get_height() + 30
-        lab_name1 = fnt_title.render(f"{user_score.username}", 1, ORANGE)
-        screen.blit(lab_name1, (align_h(lab_name1, 3, idx), line_pos))
+            line_pos += lab_title.get_height() + 30
+            lab_score = fnt_score.render(f"{user_score.highest_score:0>3d}", 1, BLUE)
+            lab_score_coord = (align_h(lab_score, 3, idx), line_pos)
 
-        # old Lastname
-        # line_pos += lab_name1.get_height() + 15
-        # lab_name2 = fnt_title.render(user_score.somethingelse, 1, ORANGE)
-        # screen.blit(lab_name2, (align_h(lab_name2, 3, idx), line_pos))
+            line_pos += lab_score.get_height() + 30
+            lab_username = fnt_title.render(f"{user_score.username}", 1, ORANGE)
+            lab_username_coord = (align_h(lab_username, 3, idx), line_pos)
+            cat_box = MainMenuCatBox(
+                rect=(left, top, width, height),
+                title=score_category,
+                rendered_title=lab_title,
+                rendered_title_coord=lab_title_coord,
+                rendered_hiscore=lab_score,
+                rendered_hiscore_coord=lab_score_coord,
+                rendered_username=lab_username,
+                rendered_username_coord=lab_username_coord,
+            )
+            self.cat_boxes.append(cat_box)
 
-    # HiScores
-    hiscores_btn_font = pygame.font.Font(None, 60)
-    hiscores_btn = hiscores_btn_font.render(
-        "HiScores",
-        1,
-        YELLOW,
-    )
-    x = SIZE[0] / 4 - hiscores_btn.get_width() / 2
-    y = SIZE[1] - 20 - hiscores_btn.get_height()
-    screen.blit(hiscores_btn, (x, y))
-    _ = pygame.draw.rect(
-        screen,
-        YELLOW,
-        (10, y - 15, SIZE[0] / 2 - 21, hiscores_btn.get_height() + 30),
-        1,
-    )
-    # Recent players
-    hiscores_btn_font = pygame.font.Font(None, 60)
-    hiscores_btn = hiscores_btn_font.render(
-        "Recent Players",
-        1,
-        YELLOW,
-    )
-    x = SIZE[0] / 2 + SIZE[0] / 4 - hiscores_btn.get_width() / 2
-    screen.blit(hiscores_btn, (x, y))
-    _ = pygame.draw.rect(
-        screen,
-        YELLOW,
-        (SIZE[0] / 2 + 10, y - 15, SIZE[0] / 2 - 21, hiscores_btn.get_height() + 30),
-        1,
-    )
+        # HiScores
+        hiscores_btn_font = pygame.font.Font(None, 60)
+        self.hiscores_btn = hiscores_btn_font.render("HiScores", 1, YELLOW)
+        x, y = (
+            SIZE[0] / 4 - self.hiscores_btn.get_width() / 2,
+            SIZE[1] - 20 - self.hiscores_btn.get_height(),
+        )
+        self.hiscores_btn_coord = (x, y)
+        self.hiscores_btn_rect = (
+            10,
+            y - 15,
+            SIZE[0] / 2 - 21,
+            self.hiscores_btn.get_height() + 30,
+        )
 
-    pygame.display.flip()
+        # Recent players
+        self.recent_scores_btn = hiscores_btn_font.render(
+            "Recent Players",
+            1,
+            YELLOW,
+        )
+        x = SIZE[0] / 2 + SIZE[0] / 4 - self.recent_scores_btn.get_width() / 2
+        self.recent_scores_btn_coord = (x, y)
+        self.recent_scores_btn_rect = (
+            SIZE[0] / 2 + 10,
+            y - 15,
+            SIZE[0] / 2 - 21,
+            self.recent_scores_btn.get_height() + 30,
+        )
+
+    def draw(self, screen):
+        screen.fill(BLACK)
+        screen.blit(self.lab_head, (align_h(self.lab_head), self.init_line_pos))
+
+        for cat_box in self.cat_boxes:
+            pygame.draw.rect(screen, WHITE, cat_box.rect, 1)
+            screen.blit(cat_box.rendered_title, cat_box.rendered_title_coord)
+            screen.blit(cat_box.rendered_hiscore, cat_box.rendered_hiscore_coord)
+            screen.blit(cat_box.rendered_username, cat_box.rendered_username_coord)
+
+        screen.blit(
+            self.crown_img,
+            self.crown_img_coord,
+        )
+
+        # HiScore
+        screen.blit(self.hiscores_btn, self.hiscores_btn_coord)
+        pygame.draw.rect(
+            screen,
+            YELLOW,
+            self.hiscores_btn_rect,
+            1,
+        )
+
+        # Recent Score
+        screen.blit(self.recent_scores_btn, self.recent_scores_btn_coord)
+        pygame.draw.rect(
+            screen,
+            YELLOW,
+            self.recent_scores_btn_rect,
+            1,
+        )
+
+        pygame.display.flip()
+
+    def selected_category_box(self, click_pos):
+        for cat_box in self.cat_boxes:
+            if rect_is_clicked(cat_box.rect, click_pos):
+                return cat_box.title
+        return None
+
+    def clicked_hiscores(self, click_pos):
+        return rect_is_clicked(self.hiscores_btn_rect, click_pos)
+
+    def clicked_recent_scores(self, click_pos):
+        return rect_is_clicked(self.recent_scores_btn_rect, click_pos)
 
 
 def game_screen(
