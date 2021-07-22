@@ -13,10 +13,10 @@ from react import GameEngine
 from scores import ScoreRepository
 
 ## Mock GPIO
-from gpiozero import Device
-from gpiozero.pins.mock import MockFactory
-
-Device.pin_factory = MockFactory()
+# from gpiozero import Device
+# from gpiozero.pins.mock import MockFactory
+#
+# Device.pin_factory = MockFactory()
 ##
 
 clock = pygame.time.Clock()

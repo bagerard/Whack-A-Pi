@@ -55,21 +55,24 @@ class GameEngine:
     def __init__(self, game_time: int):
         self.game_time = game_time
 
-        self.lights = LEDBoard(2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 10, 9)
+        self.lights = LEDBoard(
+            2,
+            # 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 10, 9
+        )
         self.buttons = [
             Button(25),
-            Button(11),
-            Button(8),
-            Button(7),
-            Button(5),
-            Button(6),
-            Button(12),
-            Button(13),
-            Button(19),
-            Button(16),
-            Button(26),
-            Button(20),
-            Button(21),
+            # Button(11),
+            # Button(8),
+            # Button(7),
+            # Button(5),
+            # Button(6),
+            # Button(12),
+            # Button(13),
+            # Button(19),
+            # Button(16),
+            # Button(26),
+            # Button(20),
+            # Button(21),
         ]
 
         self.start_time = 0
@@ -98,7 +101,7 @@ class GameEngine:
                     time.sleep(0.5)
 
         print("start start_loop_btn_thread")
-        Thread(target=_loop_btn, args=(self.buttons,)).start()
+        # Thread(target=_loop_btn, args=(self.buttons,)).start()
 
     @property
     def n_leds(self):
@@ -123,8 +126,9 @@ class GameEngine:
         print("ready_wait")
         self.lights.off()
 
-        btn_idx = 3
-        btn, led = self._get_button_led(btn_idx)
+        # default_btn_idx = 3
+        default_btn_idx = 0
+        btn, led = self._get_button_led(default_btn_idx)
 
         with light_on_led(led):
             btn_pressed = btn.wait_for_press(delay)
@@ -156,8 +160,10 @@ class GameEngine:
 
         while elapsed < self.game_time and not self.game_stop.isSet():
             # Find a button that is not the last one
-            while last_idx == self.current_idx:
-                self.current_idx = randint(0, self.n_leds - 1)
+            # while last_idx == self.current_idx:
+            #     self.current_idx = randint(0, self.n_leds - 1)
+
+            self.current_idx = 0  # BAG HARDCODE IT
 
             btn, led = self._get_button_led(self.current_idx)
 
