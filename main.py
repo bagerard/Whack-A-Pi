@@ -104,6 +104,8 @@ def play_music(mp3_path: str) -> None:
 
 
 def main():
+    run_button_thread = bool(os.environ.get("BUTTON_THREAD", 0))
+
     game_ctx = GameContext(current_mode=GAME_MODE.MAIN_MENU)
     score_repo = ScoreRepository(filepath=SCORE_FILE, backup_files=False)
 
@@ -141,7 +143,9 @@ def main():
                 wait=True,
             )
 
-            game_engine.start_loop_btn_thread()  # BAG DEBUG
+            if run_button_thread:
+                game_engine.start_loop_btn_thread()  # BAG DEBUG
+
             print("game_engine.ready_wait")
 
             if game_engine.ready_wait(min(60, GAME_TIME)):
