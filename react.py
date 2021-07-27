@@ -132,6 +132,7 @@ class GameEngine:
         btn, led = self._get_button_led(default_btn_idx)
 
         with light_on_led(led):
+            print(f"Waiting on {btn.pin.number}")
             btn_pressed = btn.wait_for_press(delay)
 
         print("btn_pressed")
