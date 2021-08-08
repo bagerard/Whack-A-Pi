@@ -1,9 +1,11 @@
+import sys
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any
 
 import pygame
+from pygame import Surface
+from pygame_vkeyboard import VKeyboardLayout, VKeyboard, VKeyboardRenderer
 import eztext
-import sys
 
 # set SIZE of the screen
 from assets import ASSETS_DIR
@@ -377,7 +379,40 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 submit_btn_clicked = _box_clicked(submit_btn, pos)
                 if submit_btn_clicked:
                     print("Submit button clicked")
-                    return [ib.value for ib in inputboxes]
+
+                    def consumer(text):
+                        inputboxes[0].value = text
+                        print("Current text : %s" % text)
+
+                    # Initializes and activates vkeyboard
+                    layout = VKeyboardLayout(VKeyboardLayout.AZERTY, height_ratio=1)
+                    surf = Surface((600, 300))
+                    keyboard = VKeyboard(
+                        surf, consumer, layout, renderer=VKeyboardRenderer.DARK
+                    )
+
+                    while True:
+                        events = pygame.event.get()
+
+                        # Update internal variables
+                        keyboard.update(events)
+
+                        # Draw the keyboard
+                        keyboard.draw(surf)
+
+                        if keyboard.get_text().endswith("#"):
+                            keyboard.disable()
+                            break
+
+                        #
+                        # Perform other tasks here
+                        #
+
+                        # Update the display
+                        screen.blit(surf, (0, 300))
+                        pygame.display.flip()
+
+                    # return [ib.value for ib in inputboxes]
 
                 for i, ib in enumerate(inputboxes):
                     ib_selected = _box_clicked(ib, pos)
