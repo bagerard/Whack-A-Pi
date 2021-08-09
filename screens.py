@@ -1,9 +1,11 @@
+import sys
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any
 
 import pygame
+from pygame import Surface
+from pygame_vkeyboard import VKeyboardLayout, VKeyboard, VKeyboardRenderer
 import eztext
-import sys
 
 # set SIZE of the screen
 from assets import ASSETS_DIR
@@ -347,6 +349,11 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
 
     submit_btn = _draw_win_screen(screen)
 
+    ## Keyboard button
+    keyboard_img = pygame.image.load(f"{ASSETS_DIR}/keyboard-64.png").convert_alpha()
+    keyboard_coord = (firstname_input.x + 450, firstname_input.y - 30)
+    keyboard_box = keyboard_img.get_rect().move(*keyboard_coord)
+
     # QuickPick usernames buttons
     quickpick_btns = []
     x_subd = 8
@@ -367,16 +374,45 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
             )
         )
 
+    # vKeyboard
+    # I couldn't manage to draw the keyboard directly on screen because
+    # it was interfering with the _draw_win_screen and keyboard was being overwritten
+    # so I switch to using a separate surface that I can then move to the right location,
+    # the downside of this is that I need to tweak the events afterwards so that events are also shifted
+    def consumer(text):
+        inputboxes[0].value = text
+
+    surf = Surface((SIZE[0] / 2, 280))
+    layout = VKeyboardLayout(
+        VKeyboardLayout.AZERTY, allow_special_chars=False, height_ratio=1
+    )
+    vkeyboard = VKeyboard(surf, consumer, layout, renderer=VKeyboardRenderer.DARK)
+    vkeyboard.disable()
+    vkeyboard_offset = (0, quickpick_btns[0].top)
+
     while True:
         clock.tick(FPS)
         events = pygame.event.get()
+
+        if vkeyboard.is_enabled():
+            # vKeyboard is draw in a separate surface that is not placed in (0, 0)
+            # but vkeyboard isnot aware of this, so it's expecting the clicks to be
+            # positioned as if the keyboard was placed in (0, 0)
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Hack - For some reason I can't deepcopy(events) so
+                    # I'm modifying the event.pos directly and permanently, this works fine
+                    # as the rest of the events aren't listening on pygame.MOUSEBUTTONDOWN
+                    # which is used by the vkeyboard so it is not interfering
+                    event.pos = [x - off for x, off in zip(event.pos, vkeyboard_offset)]
+
+            vkeyboard.update(events)
+
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
-                pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-
+                pos = pygame.mouse.get_pos()
                 submit_btn_clicked = _box_clicked(submit_btn, pos)
                 if submit_btn_clicked:
-                    print("Submit button clicked")
                     return [ib.value for ib in inputboxes]
 
                 for i, ib in enumerate(inputboxes):
@@ -388,9 +424,17 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                         ib_idx = i
                         break
 
-                for quickpick_btn in quickpick_btns:
-                    if _box_clicked(quickpick_btn, pos):
-                        inputboxes[0].value = quickpick_btn.value
+                if _box_clicked(keyboard_box, pos):
+                    if vkeyboard.is_enabled():
+                        vkeyboard.set_text("")
+                        vkeyboard.disable()
+                    else:
+                        vkeyboard.enable()
+
+                if not vkeyboard.is_enabled():
+                    for quickpick_btn in quickpick_btns:
+                        if _box_clicked(quickpick_btn, pos):
+                            inputboxes[0].value = quickpick_btn.value
 
             if event.type == pygame.KEYDOWN:
 
@@ -417,9 +461,15 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
         for ib in inputboxes:
             ib.draw(screen)
 
-        # username QuickPick
-        for quickpick_btn in quickpick_btns:
-            quickpick_btn.draw(screen)
+        screen.blit(keyboard_img, keyboard_coord)
+
+        if vkeyboard.is_enabled():
+            vkeyboard.draw(surface=surf, force=True)
+            screen.blit(surf, (0, quickpick_btns[0].top))
+        else:
+            # username QuickPick
+            for quickpick_btn in quickpick_btns:
+                quickpick_btn.draw(screen)
 
         pygame.display.flip()
 
