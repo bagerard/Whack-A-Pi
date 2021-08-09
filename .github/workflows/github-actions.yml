@@ -1,4 +1,4 @@
-name: flake8-test-name-CI
+name: whack-a-pi
 on:
   # All PR
   pull_request:
