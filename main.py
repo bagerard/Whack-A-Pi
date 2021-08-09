@@ -43,7 +43,7 @@ class GameContext:
 def on_click(
     main_menu: MainMenuGUI, game_engine, game_ctx, score_repo: ScoreRepository
 ):
-    click_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+    click_pos = pygame.mouse.get_pos()
     print("on_click", click_pos)
     categories_highest_score = score_repo.get_highest_scores_by_cat
 
