@@ -22,7 +22,7 @@ from scores import ScoreRepository
 clock = pygame.time.Clock()
 
 FPS = 30
-GAME_TIME = 5
+GAME_TIME = 30
 HISCORE_THRESHOLD = 5
 
 SCORE_FILE = "scores.json"

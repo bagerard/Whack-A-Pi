@@ -58,13 +58,14 @@ class GameEngine:
         self.lights = LEDBoard(
             2,
             3,
-            # 4, 14, 15, 17, 18, 27, 22, 23, 24, 10, 9
+            4,
+            14,  # 15, 17, 18, 27, 22, 23, 24, 10, 9
         )
         self.buttons = [
             Button(25),
             Button(11),
-            # Button(8),
-            # Button(7),
+            Button(8),
+            Button(7),
             # Button(5),
             # Button(6),
             # Button(12),
@@ -161,6 +162,8 @@ class GameEngine:
         self.user_response_time = []
 
         while elapsed < self.game_time and not self.game_stop.isSet():
+
+            # Pick a button that is not the current one
             while last_idx == self.current_idx:
                 self.current_idx = randint(0, self.n_leds - 1)
 
