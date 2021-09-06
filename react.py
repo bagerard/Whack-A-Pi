@@ -67,7 +67,8 @@ class GameEngine:
             22,
             23,
             24,
-            # 10, 9
+            10,
+            9,
         )
         self.buttons = [
             Button(25),
@@ -81,8 +82,8 @@ class GameEngine:
             Button(19),
             Button(16),
             Button(26),
-            # Button(20),
-            # Button(21),
+            Button(20),
+            Button(21),
         ]
 
         self.start_time = 0
@@ -136,8 +137,7 @@ class GameEngine:
         print("ready_wait")
         self.lights.off()
 
-        # default_btn_idx = 3
-        default_btn_idx = 0
+        default_btn_idx = 7
         btn, led = self._get_button_led(default_btn_idx)
 
         with light_on_led(led):
