@@ -6,3 +6,4 @@ random-username
 pygame_menu
 pre-commit
 pytest
+pygame_vkeyboard

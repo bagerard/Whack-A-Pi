@@ -104,7 +104,7 @@ def play_music(mp3_path: str) -> None:
 
 
 def main():
-    run_button_thread = bool(os.environ.get("BUTTON_THREAD", 0))
+    run_button_thread = bool(int(os.environ.get("BUTTON_THREAD", 0)))
 
     game_ctx = GameContext(current_mode=GAME_MODE.MAIN_MENU)
     score_repo = ScoreRepository(filepath=SCORE_FILE, backup_files=False)
@@ -252,8 +252,10 @@ def main():
 
 
 try:
+    no_frame = bool(int(os.environ.get("NOFRAME", False)))
+
     pygame.init()
-    screen = pygame.display.set_mode(SIZE)
+    screen = pygame.display.set_mode(SIZE, flags=pygame.NOFRAME if no_frame else 0)
     main()
 except BaseException as e:
     traceback.print_exception(*sys.exc_info())
