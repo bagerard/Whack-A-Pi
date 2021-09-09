@@ -80,6 +80,7 @@ def on_click(
 
     elif game_ctx.current_mode == GAME_MODE.POSTGAME:
         game_ctx.current_mode = GAME_MODE.MAIN_MENU
+        game_category = None
         show_mainscreen(game_engine, categories_highest_score)
 
     return game_category
@@ -114,7 +115,7 @@ def main():
         game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat
     )
 
-    game_category = -1
+    game_category = None
 
     print("start main while loop")
     prev_mode = game_ctx.current_mode
@@ -122,9 +123,8 @@ def main():
     while True:
         clock.tick(FPS)
 
-        # debugging
         if prev_mode != game_ctx.current_mode:
-            print("SWITCH TO MODE", game_ctx.current_mode)
+            print(f"SWITCHED TO MODE {game_ctx.current_mode}")
             prev_mode = game_ctx.current_mode
 
         if game_ctx.current_mode == GAME_MODE.INITGAME:
@@ -144,7 +144,7 @@ def main():
             )
 
             if run_button_thread:
-                game_engine.start_loop_btn_thread()  # BAG DEBUG
+                game_engine.start_loop_btn_thread()
 
             print("game_engine.ready_wait")
 
@@ -160,6 +160,7 @@ def main():
                 game_engine.start_game()
             else:
                 game_ctx.current_mode = GAME_MODE.MAIN_MENU
+                game_category = None
                 main_menu = show_mainscreen(
                     game_engine,
                     categories_highest_score=score_repo.get_highest_scores_by_cat,
@@ -202,6 +203,7 @@ def main():
                     )
 
                     game_ctx.current_mode = GAME_MODE.MAIN_MENU
+                    game_category = None
                     show_mainscreen(
                         game_engine,
                         categories_highest_score=score_repo.get_highest_scores_by_cat,
@@ -247,15 +249,15 @@ def main():
                     pygame.quit()
                     sys.exit()
             if event.type == pygame.MOUSEBUTTONUP:
-                print(f"Event: MOUSEBUTTONUP")
-                game_category = on_click(main_menu, game_engine, game_ctx, score_repo)
+                new_game_category = on_click(
+                    main_menu, game_engine, game_ctx, score_repo
+                )
+                game_category = game_category or new_game_category
 
 
 try:
-    no_frame = bool(int(os.environ.get("NOFRAME", False)))
-
     pygame.init()
-    screen = pygame.display.set_mode(SIZE, flags=pygame.NOFRAME if no_frame else 0)
+    screen = pygame.display.set_mode(SIZE)
     main()
 except BaseException as e:
     traceback.print_exception(*sys.exc_info())

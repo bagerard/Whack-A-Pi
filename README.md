@@ -21,13 +21,9 @@ And if you don't have a raspberry Pi plugged in, you can mock the GPIO device wi
 
     GPIOZERO_PIN_FACTORY=mock python main.py
 
-The position of the window can be provided with for instance:
+The start-up position of the window can be provided with for instance:
     
     SDL_VIDEO_WINDOW_POS=10,10
-
-The pygame window can be run in no-frame mode by using:
-
-    NOFRAME=1
 
 For testing/troubleshooting purposes, it is possible to launch a thread that will trigger the buttons in a loop,
 this allows for testing without a Pi. Use `BUTTON_THREAD=1` env var to turn this on. The following is what I typically
@@ -37,7 +33,7 @@ use for development:
 
 And the following is what I use when it runs on the Pi with the external monitor plugged in:
 
-    SDL_VIDEO_WINDOW_POS=0,0 NOFRAME=0 python main.py
+    SDL_VIDEO_WINDOW_POS=0,0 python main.py
 
 ## Credits
 The LED Clock (or 7 segment style) font is called Digital 7 and is freeware available from styleseven.com

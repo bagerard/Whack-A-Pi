@@ -455,6 +455,11 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                     else:
                         print("Missing required input value")
 
+            if event.type == pygame.QUIT:
+                print(f"Event: QUIT")
+                pygame.quit()
+                sys.exit()
+
         submit_btn = _draw_win_screen(screen)
 
         inputboxes[ib_idx].update(events)

@@ -11,6 +11,7 @@ from gpiozero import LEDBoard, Button
 
 
 DEFAULT_HIT_TIME = 10.0
+READY_BTN_IDX = 7
 
 
 @contextmanager
@@ -137,8 +138,7 @@ class GameEngine:
         print("ready_wait")
         self.lights.off()
 
-        default_btn_idx = 7
-        btn, led = self._get_button_led(default_btn_idx)
+        btn, led = self._get_button_led(READY_BTN_IDX)
 
         with light_on_led(led):
             print(f"Waiting on {btn.pin.number}")
@@ -187,8 +187,6 @@ class GameEngine:
 
             last_idx = self.current_idx
             elapsed = self.elapsed_time()
-        # print ("Time up")
-        # print("Score:", score)
 
     def start_idle(self):
         self.idle_stop.clear()
