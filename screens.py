@@ -408,12 +408,13 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
 
             vkeyboard.update(events)
 
+        submit_score = False
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 submit_btn_clicked = _box_clicked(submit_btn, pos)
                 if submit_btn_clicked:
-                    return [ib.value for ib in inputboxes]
+                    submit_score = True
 
                 for i, ib in enumerate(inputboxes):
                     ib_selected = _box_clicked(ib, pos)
@@ -450,15 +451,18 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                     inputboxes[ib_idx].set_focus(True)
 
                 if event.key == pygame.K_RETURN:
-                    if all(ib.value != "" for ib in inputboxes):
-                        return [ib.value for ib in inputboxes]
-                    else:
-                        print("Missing required input value")
+                    submit_score = True
 
             if event.type == pygame.QUIT:
                 print(f"Event: QUIT")
                 pygame.quit()
                 sys.exit()
+
+        if submit_score:
+            if all(ib.value != "" for ib in inputboxes):
+                return [ib.value for ib in inputboxes]
+            else:
+                print("Missing required input value")
 
         submit_btn = _draw_win_screen(screen)
 
