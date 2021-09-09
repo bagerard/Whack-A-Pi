@@ -343,9 +343,6 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
         y=line_pos,
         hasfocus=True,
     )
-    # Note if we add inputbox, we need to increment y by 50 each time
-    inputboxes = [firstname_input]
-    ib_idx = 0  # selected input box index
 
     submit_btn = _draw_win_screen(screen)
 
@@ -380,7 +377,7 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
     # so I switch to using a separate surface that I can then move to the right location,
     # the downside of this is that I need to tweak the events afterwards so that events are also shifted
     def consumer(text):
-        inputboxes[0].value = text
+        firstname_input.value = text
 
     surf = Surface((SIZE[0] / 2, 280))
     layout = VKeyboardLayout(
@@ -416,15 +413,6 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 if submit_btn_clicked:
                     submit_score = True
 
-                for i, ib in enumerate(inputboxes):
-                    ib_selected = _box_clicked(ib, pos)
-                    if ib_selected:
-                        print(f"Input box {i} selected - change focus")
-                        inputboxes[ib_idx].set_focus(False)
-                        ib.set_focus(True)
-                        ib_idx = i
-                        break
-
                 if _box_clicked(keyboard_box, pos):
                     if vkeyboard.is_enabled():
                         vkeyboard.set_text("")
@@ -435,20 +423,13 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 if not vkeyboard.is_enabled():
                     for quickpick_btn in quickpick_btns:
                         if _box_clicked(quickpick_btn, pos):
-                            inputboxes[0].value = quickpick_btn.value
+                            firstname_input.value = quickpick_btn.value
 
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_F12:
                     pygame.quit()
                     sys.exit()
-
-                if event.key == pygame.K_TAB:
-                    inputboxes[ib_idx].set_focus(False)
-                    ib_idx += 1
-                    if ib_idx >= len(inputboxes):
-                        ib_idx = 0
-                    inputboxes[ib_idx].set_focus(True)
 
                 if event.key == pygame.K_RETURN:
                     submit_score = True
@@ -459,16 +440,15 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
                 sys.exit()
 
         if submit_score:
-            if all(ib.value != "" for ib in inputboxes):
-                return [ib.value for ib in inputboxes]
+            if firstname_input.value != "":
+                return [firstname_input.value]
             else:
                 print("Missing required input value")
 
         submit_btn = _draw_win_screen(screen)
 
-        inputboxes[ib_idx].update(events)
-        for ib in inputboxes:
-            ib.draw(screen)
+        firstname_input.update(events)
+        firstname_input.draw(screen)
 
         screen.blit(keyboard_img, keyboard_coord)
 
