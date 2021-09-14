@@ -5,7 +5,6 @@ from threading import Thread, Event
 from contextlib import contextmanager
 from typing import List
 import statistics
-import math
 
 from gpiozero import LEDBoard, Button
 
@@ -26,9 +25,10 @@ def light_on_led(led):
 
 
 def compute_score_increment(time_to_hit: float):
-    MAX_HIT_SCORE = 5
-    rounded_hit_time = math.floor(time_to_hit)
-    return max(MAX_HIT_SCORE - rounded_hit_time, 1)
+    # MAX_HIT_SCORE = 5
+    # rounded_hit_time = math.floor(time_to_hit)
+    # return max(MAX_HIT_SCORE - rounded_hit_time, 1)
+    return 5  # Simplify it
 
 
 @dataclass
@@ -63,9 +63,9 @@ class GameEngine:
             14,
             15,
             17,
-            # 18,
+            18,
             27,
-            # 22,
+            22,
             23,
             24,
             10,
@@ -78,9 +78,9 @@ class GameEngine:
             Button(7),
             Button(5),
             Button(6),
-            # Button(12),
+            Button(12),
             Button(13),
-            # Button(19),
+            Button(19),
             Button(16),
             Button(26),
             Button(20),
