@@ -148,8 +148,8 @@ class ScoreRepository:
                 username=username, highest_score=score, best_mean_hit_time=mean_hit_time
             )
             self._scores[cat].append(new_score)
-            self._scores[cat] = sort_by_score(self._scores[cat])
 
+        self._scores[cat] = sort_by_score(self._scores[cat])
         self.save_to_file()
 
     @staticmethod
@@ -168,7 +168,7 @@ class ScoreRepository:
 
 
 def save_scores(high_scores: dict, score_filepath: str, backup_files: bool) -> None:
-    print("save_score")
+    print("saving scores to file")
     if backup_files and os.access(score_filepath, os.W_OK):
         os.rename(score_filepath, score_filepath + "." + str(time.time()))
     with open(score_filepath, mode="w", encoding="utf-8") as f:
