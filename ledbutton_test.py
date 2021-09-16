@@ -1,4 +1,3 @@
-import time
 from react import GameEngine
 
 # # Mock GPIO
@@ -9,7 +8,4 @@ from react import GameEngine
 # #
 
 game_engine = GameEngine(999)
-while True:
-    game_engine.lights.on()
-    time.sleep(1)
-    game_engine.lights.off()
+game_engine.button_test()
