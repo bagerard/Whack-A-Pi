@@ -1,3 +1,7 @@
+"""
+Allows to test all buttons + leds
+It will light on all the buttons, 1 by 1, waiting for push
+"""
 from react import GameEngine
 
 # # Mock GPIO
@@ -7,5 +11,6 @@ from react import GameEngine
 # Device.pin_factory = MockFactory()
 # #
 
-game_engine = GameEngine(999)
-game_engine.button_test()
+if __name__ == "__main__":
+    game_engine = GameEngine(999)
+    game_engine.button_test()

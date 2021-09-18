@@ -1,3 +1,7 @@
+"""
+Allows to test all ledgs
+It will light all leds
+"""
 import time
 from react import GameEngine
 
@@ -8,8 +12,10 @@ from react import GameEngine
 # Device.pin_factory = MockFactory()
 # #
 
-game_engine = GameEngine(999)
-while True:
-    game_engine.lights.on()
-    time.sleep(1)
-    game_engine.lights.off()
+if __name__ == "__main__":
+    game_engine = GameEngine(999)
+    while True:
+        game_engine.lights.on()
+        time.sleep(1)
+        game_engine.lights.off()
+        time.sleep(1)
