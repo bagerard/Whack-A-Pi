@@ -13,11 +13,11 @@ def init_hiscore_menu(on_close_cb, hiscores: List[UserScore]) -> "pygame_menu.Me
     theme_menu.scrollbar_cursor = pygame_menu.locals.CURSOR_HAND
 
     menu = pygame_menu.Menu(
-        height=400,
+        height=600,
         onclose=on_close_cb,
         theme=pygame_menu.themes.THEME_SOLARIZED,
         title="HiScores",
-        width=700,
+        width=800,
     )
     table_contrib = menu.add.table()
     table_contrib.default_cell_padding = 5
@@ -25,7 +25,7 @@ def init_hiscore_menu(on_close_cb, hiscores: List[UserScore]) -> "pygame_menu.Me
     bold_font = pygame_menu.font.FONT_OPEN_SANS_BOLD
 
     column_names = ["rank"] + list(hiscores[0].pretty_dict().keys())
-    table_contrib.add_row(column_names, cell_font=bold_font, cell_font_size=15)
+    table_contrib.add_row(column_names, cell_font=bold_font, cell_font_size=19)
 
     # Assign a rank to each score
     ranked_score = sorted({us.highest_score for us in hiscores}, reverse=1)  # type: ignore

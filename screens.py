@@ -381,7 +381,7 @@ def win_screen(screen, recent_usernames: List[str]) -> List[str]:
 
     surf = Surface((SIZE[0] / 2, 280))
     layout = VKeyboardLayout(
-        VKeyboardLayout.AZERTY, allow_special_chars=False, height_ratio=1
+        VKeyboardLayout.QWERTY, allow_special_chars=False, height_ratio=1
     )
     vkeyboard = VKeyboard(surf, consumer, layout, renderer=VKeyboardRenderer.DARK)
     vkeyboard.disable()
