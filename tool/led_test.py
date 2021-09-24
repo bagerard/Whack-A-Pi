@@ -16,6 +16,6 @@ if __name__ == "__main__":
     game_engine = GameEngine(999)
     while True:
         game_engine.lights.on()
-        time.sleep(1)
+        time.sleep(10)
         game_engine.lights.off()
         time.sleep(1)

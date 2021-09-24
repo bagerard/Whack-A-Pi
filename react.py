@@ -75,6 +75,9 @@ class GameEngine:
         ]
 
         if disabled_btn_idx is not None:
+            print(
+                f"Disabling button/led idx: {disabled_btn_idx} (b{button_gpios[disabled_btn_idx]}, l{led_gpios[disabled_btn_idx]}) "
+            )
             del led_gpios[disabled_btn_idx]
             del button_gpios[disabled_btn_idx]
 
@@ -200,9 +203,9 @@ class GameEngine:
                 idx_arrays[i] = [idx for idx in idx_arrays[i] if idx < self.n_leds]
             return idx_arrays
 
-        rows = safe_idx([[0, 1], [2, 3, 4], [5, 6, 7, 8], [9, 10, 11], [12]])
-        cols = safe_idx([[5], [0, 2, 9], [6], [3, 10, 12], [7], [1, 4, 11], [8]])
-        pulse = safe_idx([[6, 7], [3, 10], [2, 4, 9, 11], [5, 8], [0, 1, 12]])
+        rows = safe_idx([[0, 12], [1, 2, 11], [3, 7, 10], [4], [5, 9], [6, 8]])
+        cols = safe_idx([[6, 5, 4, 3, 0], [2, 1], [7], [8, 9, 10, 11, 12]])
+        pulse = safe_idx([[6, 12], [8, 0], [4, 5, 9, 10], [1, 2, 3, 7, 11]])
 
         while not self.idle_stop.isSet():
             idle_pattern = randint(0, max_patterns)
