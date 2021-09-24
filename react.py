@@ -53,39 +53,33 @@ class GameResult:
 
 
 class GameEngine:
-    def __init__(self, game_time: int):
+    def __init__(self, game_time: int, disabled_btn_idx: int = None):
         self.game_time = game_time
 
-        self.lights = LEDBoard(
-            2,
-            3,
-            4,
-            14,
-            15,
-            17,
-            18,
-            27,
-            22,
-            23,
-            24,
-            10,
-            9,
-        )
-        self.buttons = [
-            Button(25),
-            Button(11),
-            Button(8),
-            Button(7),
-            Button(5),
-            Button(6),
-            Button(12),
-            Button(13),
-            Button(19),
-            Button(16),
-            Button(26),
-            Button(20),
-            Button(21),
+        led_gpios = [2, 3, 4, 14, 15, 17, 18, 27, 22, 23, 24, 10, 9]
+
+        button_gpios = [
+            25,
+            11,
+            8,
+            7,
+            5,
+            6,
+            12,
+            13,
+            19,
+            16,
+            26,
+            20,
+            21,
         ]
+
+        if disabled_btn_idx is not None:
+            del led_gpios[disabled_btn_idx]
+            del button_gpios[disabled_btn_idx]
+
+        self.lights = LEDBoard(*led_gpios)
+        self.buttons = [Button(gpio_idx) for gpio_idx in button_gpios]
 
         self.start_time = 0
         self.game_result = GameResult()
@@ -199,9 +193,16 @@ class GameEngine:
 
     def _idle(self):
         max_patterns = 4
-        rows = [[0, 1], [2, 3, 4], [5, 6, 7, 8], [9, 10, 11], [12]]
-        cols = [[5], [0, 2, 9], [6], [3, 10, 12], [7], [1, 4, 11], [8]]
-        pulse = [[6, 7], [3, 10], [2, 4, 9, 11], [5, 8], [0, 1, 12]]
+
+        def safe_idx(idx_arrays):
+            # remove non-existing idx (if any)
+            for i, _ in enumerate(idx_arrays):
+                idx_arrays[i] = [idx for idx in idx_arrays[i] if idx < self.n_leds]
+            return idx_arrays
+
+        rows = safe_idx([[0, 1], [2, 3, 4], [5, 6, 7, 8], [9, 10, 11], [12]])
+        cols = safe_idx([[5], [0, 2, 9], [6], [3, 10, 12], [7], [1, 4, 11], [8]])
+        pulse = safe_idx([[6, 7], [3, 10], [2, 4, 9, 11], [5, 8], [0, 1, 12]])
 
         while not self.idle_stop.isSet():
             idle_pattern = randint(0, max_patterns)
@@ -214,14 +215,14 @@ class GameEngine:
 
             if idle_pattern == 0:
                 while time.time() - seq_start < 5 and not self.idle_stop.isSet():
-                    self.lights.leds[randint(0, self.n_leds - 1)].toggle()
+                    self.lights[randint(0, self.n_leds - 1)].toggle()
                     self.idle_stop.wait(0.1)
 
             if idle_pattern == 1:
                 for i in range(0, 2):
                     count = 0
                     while count < self.n_leds and not self.idle_stop.isSet():
-                        self.lights.leds[count].toggle()
+                        self.lights[count].toggle()
                         count += 1
                         self.idle_stop.wait(0.25)
 

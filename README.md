@@ -31,6 +31,11 @@ use for development:
 
     GPIOZERO_PIN_FACTORY=mock BUTTON_THREAD=1 python main.py
 
+In case a button breaks or is not available, it is also possible to remove it from the game
+by its index (starting at 0) with for instance:
+
+    DISABLED_BTN=4
+
 And the following is what I use when it runs on the Pi with the external monitor plugged in:
 
     SDL_VIDEO_WINDOW_POS=0,0 python main.py

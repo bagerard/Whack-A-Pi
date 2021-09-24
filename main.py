@@ -107,10 +107,13 @@ def play_music(mp3_path: str) -> None:
 def main():
     run_button_thread = bool(int(os.environ.get("BUTTON_THREAD", 0)))
 
+    _disabled_btn_idx = os.environ.get("DISABLED_BTN")
+    disabled_btn_idx = int(_disabled_btn_idx) if _disabled_btn_idx else None
+
     game_ctx = GameContext(current_mode=GAME_MODE.MAIN_MENU)
     score_repo = ScoreRepository(filepath=SCORE_FILE, backup_files=False)
 
-    game_engine = GameEngine(game_time=GAME_TIME)
+    game_engine = GameEngine(game_time=GAME_TIME, disabled_btn_idx=disabled_btn_idx)
     main_menu = show_mainscreen(
         game_engine, categories_highest_score=score_repo.get_highest_scores_by_cat
     )
