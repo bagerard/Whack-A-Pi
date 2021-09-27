@@ -3,6 +3,8 @@ import traceback
 import sys
 from enum import Enum
 import os
+import glob
+import random
 
 import pygame
 
@@ -109,12 +111,18 @@ def show_mainscreen(game_engine, categories_highest_score) -> MainMenuGUI:
 
 
 def play_music(mp3_path: str) -> None:
+    print(f"Playing {mp3_path}...")
     if os.path.exists(mp3_path):
         pygame.mixer.music.load(mp3_path)
         pygame.mixer.music.play()
         print("done playing music")
     else:
         print(f"fake play music {mp3_path}")
+
+
+def play_random_music_from_dir(sound_dir):
+    sounds = glob.glob(os.path.join(sound_dir, "*.wav"))
+    play_music(random.choice(sounds))
 
 
 def main():
@@ -165,7 +173,7 @@ def main():
             print("game_engine.ready_wait")
 
             if game_engine.ready_wait(min(60, GAME_TIME)):
-                play_music(f"{ASSETS_DIR}/robots_auto_aim_engaged.wav")
+                play_random_music_from_dir(f"{ASSETS_DIR}/launch_game")
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
 

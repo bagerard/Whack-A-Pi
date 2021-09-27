@@ -6,6 +6,7 @@ Main features that were added:
 - Store all players scores, not only highest scores
 - Store additional metadata per game (latest game timestamp, mean hit time, number of games)
 - Add a 'HiScore' & 'Recent Players' screen
+- Add a 'Settings' screen
 
 ## Install
 Make sure you have pyenv installed, then run:
@@ -31,7 +32,7 @@ use for development:
 
     GPIOZERO_PIN_FACTORY=mock BUTTON_THREAD=1 python main.py
 
-In case a button breaks or is not available, it is also possible to remove it from the game
+In case a button breaks or is not available, it is also possible to remove one from the game
 by its index (starting at 0) with for instance:
 
     DISABLED_BTN=4
