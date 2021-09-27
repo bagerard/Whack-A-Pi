@@ -116,17 +116,16 @@ class GameEngine:
     def n_leds(self):
         return len(self.lights.leds)
 
-    def button_test(self):
+    def button_test(self, wait_for_press_time=5):
         print("button test")
         self.lights.on()
-        time.sleep(5)
+        time.sleep(3)
         self.lights.off()
 
         for idx in range(0, self.n_leds):
             btn, led = self._get_button_led(idx)
-            print(led.pin.number)
             with light_on_led(led):
-                btn.wait_for_press(30)
+                btn.wait_for_press(wait_for_press_time)
 
     def elapsed_time(self):
         return time.time() - self.start_time

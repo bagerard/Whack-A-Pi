@@ -71,6 +71,15 @@ class MainMenuGUI:
         fnt_head = pygame.font.Font(None, 175)
         self.lab_head = fnt_head.render("Whack-A-Pi", 1, YELLOW)
 
+        # Settings icon
+        self.settings_img = pygame.image.load(
+            f"{ASSETS_DIR}/settings_small.png"
+        ).convert_alpha()
+        self.settings_img_coord = (
+            SIZE[0] - self.settings_img.get_width() - 20,
+            self.init_line_pos,
+        )
+
         # Category Box
         fnt_title = pygame.font.Font(None, 84)
         fnt_score = pygame.font.Font(CLOCK_FONT_PATH, 200)
@@ -168,6 +177,12 @@ class MainMenuGUI:
         screen.fill(BLACK)
         screen.blit(self.lab_head, (align_h(self.lab_head), self.init_line_pos))
 
+        # settings icon
+        screen.blit(
+            self.settings_img,
+            self.settings_img_coord,
+        )
+
         for cat_box in self.cat_boxes:
             pygame.draw.rect(screen, WHITE, cat_box.rect, 1)
             screen.blit(cat_box.rendered_title, cat_box.rendered_title_coord)
@@ -204,6 +219,14 @@ class MainMenuGUI:
             if rect_is_clicked(cat_box.rect, click_pos):
                 return cat_box.title
         return None
+
+    def clicked_settings(self, click_pos):
+        img_rect = [
+            *self.settings_img_coord,
+            self.settings_img.get_width(),
+            self.settings_img.get_height(),
+        ]
+        return rect_is_clicked(img_rect, click_pos)
 
     def clicked_hiscores(self, click_pos):
         return rect_is_clicked(self.hiscores_btn_rect, click_pos)

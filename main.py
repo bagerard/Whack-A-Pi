@@ -18,6 +18,7 @@ from scores import ScoreRepository
 #
 # Device.pin_factory = MockFactory()
 ##
+from settings_menu import init_settings_menu
 
 clock = pygame.time.Clock()
 
@@ -50,17 +51,19 @@ def on_click(
     game_category = None
     if game_ctx.current_mode == GAME_MODE.MAIN_MENU:
         game_category = main_menu.selected_category_box(click_pos)
+
         if game_category:
             game_ctx.current_mode = GAME_MODE.INITGAME
             pygame.display.flip()
         else:
+
+            showmainscreen_cb = lambda: show_mainscreen(
+                game_engine, categories_highest_score
+            )
+
             if main_menu.clicked_hiscores(click_pos) or main_menu.clicked_recent_scores(
                 click_pos
             ):
-                showmainscreen_cb = lambda: show_mainscreen(
-                    game_engine, categories_highest_score
-                )
-
                 rank_by_hiscore = main_menu.clicked_hiscores(click_pos)
 
                 sorted_scores = (
@@ -70,6 +73,16 @@ def on_click(
                 )
                 menu = init_hiscore_menu(
                     on_close_cb=showmainscreen_cb, hiscores=sorted_scores
+                )
+                menu.mainloop(
+                    surface=screen,
+                    disable_loop=False,
+                    fps_limit=30,
+                )
+                pygame.display.flip()
+            elif main_menu.clicked_settings(click_pos):
+                menu = init_settings_menu(
+                    on_close_cb=showmainscreen_cb, game_engine=game_engine
                 )
                 menu.mainloop(
                     surface=screen,
