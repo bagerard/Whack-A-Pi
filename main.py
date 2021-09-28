@@ -83,6 +83,7 @@ def on_click(
                 )
                 pygame.display.flip()
             elif main_menu.clicked_settings(click_pos):
+                game_engine.stop_idle()
                 menu = init_settings_menu(
                     on_close_cb=showmainscreen_cb, game_engine=game_engine
                 )
