@@ -178,6 +178,5 @@ def save_scores(high_scores: dict, score_filepath: str, backup_files: bool) -> N
 def load_scores(score_filepath):
     if os.access(score_filepath, os.R_OK):
         with open(score_filepath, encoding="utf-8") as f:
-            print("Load existing scores")
             return json.load(f)
     print("No existing scores found")
