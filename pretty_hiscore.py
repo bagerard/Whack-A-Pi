@@ -1,4 +1,4 @@
-# Targeted for star wars screensaver
+# Targeted for star wars xscreensaver
 # star wars > advanced tab > Program: bash dev/Whack-A-Pi/print_pretty_hiscores.sh
 # with the .sh file being:
 # SCORE_FILE="dev/Whack-A-Pi/scores.json" ~/.pyenv/versions/whack-a-mole/bin/python dev/Whack-A-Pi/pretty_hiscore.py
@@ -10,7 +10,7 @@ import os
 from scores import ScoreRepository
 from beautifultable import BeautifulTable
 
-score_file = os.environ.get("SCORE_FILE", "scores.json")
+score_file = os.environ.get("SCORE_FILE", "../../scores.json")
 
 if not os.path.isfile(score_file):
     raise Exception(f"No Score file available: {score_file}")
@@ -39,7 +39,6 @@ ranked_score_map = {score: rank for rank, score in enumerate(ranked_score, start
 
 table = BeautifulTable(default_padding=2)
 table.columns.header = ["Rank", "Jedi Rank", "User", "HiScore"]
-
 for user_score in ranked_hiscores:
     user_rank = ranked_score_map[user_score.highest_score]
     jedi_rank = (
@@ -54,7 +53,7 @@ for user_score in ranked_hiscores:
         ]
     )
 
-print("                              < HiScores Table >")
+print("                              - HiScores Table -")
 print("")
 
 print(table)
