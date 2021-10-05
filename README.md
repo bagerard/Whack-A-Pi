@@ -20,7 +20,7 @@ Main features that were added:
 
 ## Construction
 - Wooden structure [plans](doc/wooden_structure.md)
-- Picture preparation  [picture](doc/picture.md)
+- Picture preparation  [picture](doc/picture_prep.md)
 - Drilling button & screen holes [drilling](doc/drilling.md)
 - Cabling [cabling](doc/cabling.md)
 
