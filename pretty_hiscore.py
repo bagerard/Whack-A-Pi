@@ -1,10 +1,3 @@
-# Targeted for star wars xscreensaver
-# star wars > advanced tab > Program: bash dev/Whack-A-Pi/print_pretty_hiscores.sh
-# with the .sh file being:
-# SCORE_FILE="dev/Whack-A-Pi/scores.json" ~/.pyenv/versions/whack-a-mole/bin/python dev/Whack-A-Pi/pretty_hiscore.py
-# xscreensaver and star wars screensaver can be installed with
-# apt-get install xscreensaver xscreensaver-data-extra xscreensaver-gl-extra
-
 import os
 
 from scores import ScoreRepository
@@ -27,7 +20,7 @@ JEDI_RANKS = [
     "Jedi Knight",
     "Jedi Service Corps",
     "Padawan",
-    "Jedi Youngling",
+    "Youngling",
 ]
 
 score_repo = ScoreRepository(filepath=score_file, backup_files=False)
