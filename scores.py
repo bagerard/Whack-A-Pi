@@ -11,7 +11,7 @@ from typing import List, Dict, Iterable
 
 from random_username.generate import generate_username
 
-SCORE_CATEGORIES = ["Product", "F&A", "Ops"]
+SCORE_CATEGORIES = ["Product / R&D", "F&A / CxO", "Ops / CS"]
 
 DEFAULT_RAW_HIGH_SCORES = {
     cat: [
