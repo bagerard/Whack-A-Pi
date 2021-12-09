@@ -7,6 +7,7 @@ Main features that were added:
 - Store additional metadata per game (latest game timestamp, mean hit time, number of games)
 - Add a 'HiScore' & 'Recent Players' screen
 - Add a 'Settings' screen
+- Add score penalty in case wrong button is pressed 
 - Star Wars theme
 
 ![whole-thing](doc/whole_thing.png)
