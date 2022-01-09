@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass, field
-from random import randint
+from functools import partial
+from random import randint, choice
 from threading import Thread, Event
 from contextlib import contextmanager
 from typing import List
@@ -106,12 +107,21 @@ class GameEngine:
 
         def _loop_btn(buttons):
             print("Start dirty loop that press buttons...")
+
             while not self.game_stop.isSet():
-                for btn in buttons:
-                    print(f"push button {btn.pin.number}")
-                    btn.pin.drive_low()
-                    btn.pin.drive_high()
-                    time.sleep(0.5)
+                if self.current_idx == -1:
+                    # ready_wait phase
+                    chances = [READY_BTN_IDX, randint(0, len(buttons) - 1)]
+                else:
+                    chances = [self.current_idx for i in range(4)] + [
+                        randint(0, len(buttons) - 1)
+                    ]
+                btn_pressed = choice(chances)
+                btn = buttons[btn_pressed]
+                print(f"Pressed {btn_pressed} ({btn.pin.number})")
+                btn.pin.drive_low()
+                btn.pin.drive_high()
+                time.sleep(0.5)
 
         print("start start_loop_btn_thread")
         Thread(target=_loop_btn, args=(self.buttons,)).start()
@@ -171,11 +181,11 @@ class GameEngine:
             # For some reason this doesn't get
             # called when wait_for_press is used
             if self.current_idx != idx:
-                print(f"Miss! {idx} not {self.current_idx}")
+                print(f"Penalty! {idx} hit instead of {self.current_idx}")
                 self.game_result.register_new_miss()
 
         for btn_idx, btn in enumerate(self.buttons):
-            btn.when_pressed = lambda: _penalty_on_press(btn_idx)
+            btn.when_pressed = partial(_penalty_on_press, btn_idx)
 
         while elapsed < self.game_time and not self.game_stop.isSet():
 
@@ -200,6 +210,8 @@ class GameEngine:
         # discard callbacks
         for btn in self.buttons:
             btn.when_pressed = None
+
+        self.game_stop.set()
 
     def start_idle(self):
         self.idle_stop.clear()
