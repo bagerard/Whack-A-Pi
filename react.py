@@ -9,7 +9,6 @@ import statistics
 from gpiozero import LEDBoard, Button
 
 
-PENALTY_MULTIPLER = 2
 DEFAULT_HIT_TIME = 10.0
 READY_BTN_IDX = 7
 
@@ -40,9 +39,6 @@ class GameResult:
     def register_new_hit(self, hit_time: float):
         self.score += compute_score_increment(hit_time)
         self.response_times.append(hit_time)
-
-    def register_new_miss(self):
-        self.score -= compute_score_increment(0) * PENALTY_MULTIPLER
 
     @property
     def mean_hit_time(self):
@@ -167,15 +163,7 @@ class GameEngine:
         last_idx = -1
         self.game_result = GameResult()
 
-        def _penalty_on_press(idx):
-            # For some reason this doesn't get
-            # called when wait_for_press is used
-            if self.current_idx != idx:
-                print(f"Miss! {idx} not {self.current_idx}")
-                self.game_result.register_new_miss()
-
-        for btn_idx, btn in enumerate(self.buttons):
-            btn.when_pressed = lambda: _penalty_on_press(btn_idx)
+        self.user_response_time = []
 
         while elapsed < self.game_time and not self.game_stop.isSet():
 
@@ -188,18 +176,13 @@ class GameEngine:
             with light_on_led(led):
                 start = time.time()
                 delay = max(0, self.game_time - self.elapsed_time())
-                print(f"--> run game, waiting on {self.current_idx}...")
+                print(f"--> run game, waiting on {btn.pin.number}...")
                 if btn.wait_for_press(delay):
-                    print(f"Catch press {self.current_idx}")
                     time_to_press = time.time() - start
                     self.game_result.register_new_hit(time_to_press)
 
             last_idx = self.current_idx
             elapsed = self.elapsed_time()
-
-        # discard callbacks
-        for btn in self.buttons:
-            btn.when_pressed = None
 
     def start_idle(self):
         self.idle_stop.clear()
