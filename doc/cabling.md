@@ -10,6 +10,6 @@ Here is the electronic schema (built with Fritzing) showing how 1 button is wire
 
 In practice, it is stlightly different as:
 - all the (+) pin of the LEDs are chained
-- all the (-) pin of the Button are chained
+- all the (-) pin of the Buttons are chained
 
 ![back_pic](back_pic_cables.png)
