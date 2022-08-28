@@ -74,4 +74,5 @@ Then open xscreensaver and go to  star wars > advanced tab, and in 'Program', se
 ![screensaver](doc/star_wars_screensaver.png)
 
 ## Credits
-The LED Clock (or 7 segment style) font is called Digital 7 and is freeware available from styleseven.com
+- The LED Clock (or 7 segment style) font is called Digital 7 and is freeware available from styleseven.com
+- Big thank you to my colleague Cédric Jacobus for building the wooden structure
