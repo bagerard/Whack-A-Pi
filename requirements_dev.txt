@@ -4,7 +4,7 @@ pygame
 gpiozero
 random-username
 pygame_menu
-pre-commit
+pre-commit>=2.20.0
 pytest
 pygame_vkeyboard
 beautifultable
